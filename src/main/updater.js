@@ -1,24 +1,31 @@
-// Actualizaciones automaticas desde las Releases de GitHub (electron-updater, repositorio publico).
-// Totalmente automatico (decision del usuario): busca al arrancar y cada 4 h, descarga en segundo
-// plano y se instala al salir. Como la app vive en la bandeja y casi nunca se cierra, si hay una
-// version descargada y el cliente de LoL lleva 10 min cerrado, se instala en silencio y la app se
-// vuelve a abrir en la bandeja (con --updated). Nunca durante una seleccion o partida.
+// Actualizaciones desde las Releases de GitHub (electron-updater, repositorio publico).
+// - Al abrir la app comprueba enseguida (y luego cada 4 h) y descarga en segundo plano; la interfaz
+//   avisa de si esta al dia o hay version nueva y ofrece «Instalar y reiniciar» (install()).
+// - Respaldo automatico: se instala al salir o, si el cliente de LoL lleva 10 min cerrado, en
+//   silencio (la app vuelve a la bandeja con --updated). Nunca durante una seleccion o partida.
 const { app } = require('electron');
+const fs = require('fs');
+const path = require('path');
 const { log } = require('./log');
 
 const CHECK_EVERY = 4 * 3600e3;
 const IDLE_BEFORE_INSTALL = 10 * 60e3;
+// Marca para volver a mostrar la ventana tras una instalacion pedida desde la interfaz
+const SHOW_MARK = () => path.join(app.getPath('userData'), 'show-after-update');
 
-// isIdle(): true si se puede reiniciar (cliente cerrado); beforeInstall(): para salir sin ir a la bandeja
-function initUpdater({ isIdle, beforeInstall }) {
+// isIdle(): true si se puede reiniciar (cliente cerrado); beforeInstall(): para salir sin ir a la
+// bandeja; onChange(): el estado ha cambiado (para mandarlo a la interfaz)
+function initUpdater({ isIdle, beforeInstall, onChange = () => {} }) {
+  const status = { version: app.getVersion(), state: app.isPackaged ? 'idle' : 'dev', next: null, percent: null, checkedAt: null };
+  const api = { status, check: async () => false, install: () => { throw new Error('Esta copia no se actualiza (sin empaquetar)'); } };
   // Sin empaquetar no hay app-update.yml ni nada que actualizar
-  if (!app.isPackaged) return null;
+  if (!app.isPackaged) return api;
   let autoUpdater;
   try {
     ({ autoUpdater } = require('electron-updater'));
   } catch (e) {
     log(`actualizar: electron-updater no disponible (${e.message})`);
-    return null;
+    return api;
   }
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
@@ -27,34 +34,56 @@ function initUpdater({ isIdle, beforeInstall }) {
     error: m => log(`actualizar: ${m}`), debug: () => {},
   };
 
-  const status = { version: app.getVersion(), state: 'idle', next: null };
-  let idleSince = null;
-  autoUpdater.on('checking-for-update', () => { status.state = 'checking'; });
-  autoUpdater.on('update-not-available', () => { status.state = 'latest'; });
-  autoUpdater.on('update-available', info => { status.state = 'downloading'; status.next = info.version; });
-  autoUpdater.on('update-downloaded', info => {
-    status.state = 'ready';
-    status.next = info.version;
-    log(`actualizar: ${info.version} descargada; se instala al salir o con el cliente cerrado 10 min`);
+  const set = patch => { Object.assign(status, patch); onChange(); };
+  let lastPct = -1;
+  autoUpdater.on('checking-for-update', () => { if (status.state !== 'ready') set({ state: 'checking' }); });
+  autoUpdater.on('update-not-available', () => set({ state: 'latest', next: null, checkedAt: Date.now() }));
+  autoUpdater.on('update-available', info => set({ state: 'downloading', next: info.version, percent: 0, checkedAt: Date.now() }));
+  autoUpdater.on('download-progress', p => {
+    const pct = Math.floor(p.percent || 0);
+    if (pct === lastPct) return;
+    lastPct = pct;
+    set({ percent: pct });
   });
-  autoUpdater.on('error', e => { status.state = 'error'; log(`actualizar: error ${e?.message || e}`); });
+  autoUpdater.on('update-downloaded', info => {
+    set({ state: 'ready', next: info.version, percent: 100 });
+    log(`actualizar: ${info.version} descargada; lista para instalar`);
+  });
+  autoUpdater.on('error', e => { set({ state: 'error' }); log(`actualizar: error ${e?.message || e}`); });
 
-  const check = () => autoUpdater.checkForUpdates().catch(e => log(`actualizar: no se pudo comprobar (${e.message})`));
-  setTimeout(check, 30e3);
-  setInterval(check, CHECK_EVERY);
+  api.check = async () => {
+    if (['checking', 'downloading', 'ready'].includes(status.state)) return true;
+    try { await autoUpdater.checkForUpdates(); return true; } catch (e) { log(`actualizar: no se pudo comprobar (${e.message})`); set({ state: 'error' }); return false; }
+  };
+  api.install = (show = true) => {
+    if (status.state !== 'ready') throw new Error(status.state === 'downloading' ? `Todavía se está descargando (${status.percent || 0} %)` : 'No hay ninguna versión nueva descargada');
+    log(`actualizar: instalando ${status.next}${show ? ' (pedido desde la interfaz)' : ' en silencio'}`);
+    if (show) { try { fs.writeFileSync(SHOW_MARK(), String(status.next)); } catch { } }
+    beforeInstall();
+    // isSilent: sin ventanas del instalador; isForceRunAfter: volver a abrir la app
+    setImmediate(() => autoUpdater.quitAndInstall(true, true));
+    return true;
+  };
 
+  // Enseguida al abrir (lo justo para que la ventana este lista) y luego cada 4 h
+  setTimeout(api.check, 3000);
+  setInterval(api.check, CHECK_EVERY);
+
+  // Respaldo: instalar en silencio con el cliente de LoL cerrado 10 min
+  let idleSince = null;
   setInterval(() => {
     if (status.state !== 'ready') return;
     if (!isIdle()) { idleSince = null; return; }
     idleSince ||= Date.now();
-    if (Date.now() - idleSince < IDLE_BEFORE_INSTALL) return;
-    log(`actualizar: instalando ${status.next} en silencio`);
-    beforeInstall();
-    // isSilent: sin ventanas del instalador; isForceRunAfter: volver a abrir la app
-    autoUpdater.quitAndInstall(true, true);
+    if (Date.now() - idleSince >= IDLE_BEFORE_INSTALL) api.install(false);
   }, 60e3);
 
-  return status;
+  return api;
 }
 
-module.exports = { initUpdater };
+// Tras una instalacion pedida desde la interfaz: true (y se borra la marca) si hay que mostrar la ventana
+function consumeShowMark() {
+  try { fs.unlinkSync(SHOW_MARK()); return true; } catch { return false; }
+}
+
+module.exports = { initUpdater, consumeShowMark };

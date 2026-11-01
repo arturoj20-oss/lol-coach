@@ -25,7 +25,7 @@ App.register('settings', {
             <div class="range-row"><input class="range" type="range" min="0" max="10" step="1" data-k="acceptDelay" aria-label="Retraso antes de aceptar"><output class="num" data-out="acceptDelay"></output></div>
           </div>
           <label class="check"><input type="checkbox" data-k="startWithWindows"><span>Iniciar con Windows (minimizado en la bandeja)</span></label>
-          <p class="muted small set-hint" data-update></p>
+          <div class="update-row"><p class="muted small set-hint grow" data-update></p><button type="button" class="btn small" data-act="checkUpdate">Buscar actualizaciones</button></div>
           <div class="sep"></div>
           <div class="field set-range">
             <span class="label">Objetivo de farmeo</span>
@@ -121,6 +121,11 @@ App.register('settings', {
         window.api.action('testOverlay').then(() => App.toast('Overlay de prueba visible durante 10 s', 'ok')).catch(err => App.toast(err.message, 'error'));
       }
       if (act.dataset.act === 'saveKey') this.saveKey(act.dataset.name);
+      if (act.dataset.act === 'checkUpdate') {
+        // El aviso de «al día» vuelve a salir tras una comprobacion pedida a mano
+        App.updateToastShown = false;
+        window.api.action('checkUpdate').catch(err => App.toast(err.message, 'error'));
+      }
     });
     el.addEventListener('keydown', e => {
       if (e.key === 'Enter' && e.target.dataset.secret) this.saveKey(e.target.dataset.secret);
@@ -175,8 +180,10 @@ App.register('settings', {
     const up = App.data.state?.update;
     if (up) {
       const txt = { dev: 'sin empaquetar: no se actualiza', idle: 'actualizaciones automáticas', checking: 'buscando actualizaciones...', latest: 'al día',
-        downloading: `descargando la ${up.next}...`, ready: `la ${up.next} se instalará sola al cerrar la app o con el cliente de LoL cerrado`, error: 'no se pudo comprobar si hay actualizaciones (mira el registro)' }[up.state] || '';
+        downloading: `descargando la ${up.next} (${up.percent ?? 0} %)...`, ready: `la ${up.next} está lista: instálala desde la barra de arriba o se instalará sola al cerrar la app`, error: 'no se pudo comprobar si hay actualizaciones (mira el registro)' }[up.state] || '';
       $('[data-update]', this.el).textContent = `Versión ${up.version} · ${txt}`;
+      const btn = $('[data-act="checkUpdate"]', this.el);
+      btn.disabled = ['dev', 'checking', 'downloading', 'ready'].includes(up.state);
     }
     $('[data-otp-status]', this.el).textContent = !otp ? ''
       : !c.otpBuilds ? `Descarga desactivada: se usan los datos que ya hay (${fmt.int(otp.ready)} de ${fmt.int(otp.total)} campeones listos)`

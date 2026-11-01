@@ -2,7 +2,8 @@
 
 body {
   display: grid;
-  grid-template-rows: 56px minmax(0, 1fr);
+  /* Barra superior, aviso de actualizacion (oculto casi siempre) y vistas */
+  grid-template-rows: 56px auto minmax(0, 1fr);
   /* Sin esto el contenido de la barra superior puede ensanchar toda la ventana */
   grid-template-columns: minmax(0, 1fr);
 }
@@ -107,7 +108,23 @@ body {
 }
 
 /* ---------- Vistas ---------- */
-#views { position: relative; min-height: 0; }
+#views { position: relative; min-height: 0; grid-row: 3; }
+.topbar { grid-row: 1; }
+
+/* Aviso de version nueva (updater.js): descargando o lista para instalar */
+.update-bar {
+  grid-row: 2;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  background: var(--accent-2-soft);
+  border-bottom: 1px solid var(--accent-2);
+  color: var(--text-hi);
+}
+.update-bar[hidden] { display: none; }
+.update-bar svg { width: 16px; height: 16px; flex: none; transform: rotate(-90deg); color: var(--accent-2-text); }
+.update-bar .grow { flex: 1; min-width: 0; }
+.update-bar > span[data-tip] { display: inline-flex; }
+.update-bar > span[data-tip] > .btn:disabled { pointer-events: none; }
 .view { position: absolute; inset: 0; overflow: auto; }
 .view[hidden] { display: none; }
 /* Entrada suave al cambiar de vista */

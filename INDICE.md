@@ -26,7 +26,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 ## Proceso principal: `src/main/`
 | Archivo | Qué contiene (funciones clave) |
 |---|---|
-| `updater.js` | `initUpdater({ isIdle, beforeInstall })`: actualizaciones automáticas desde GitHub Releases; devuelve el estado que va en `state.update` |
+| `updater.js` | `initUpdater({ isIdle, beforeInstall, onChange })` → `{ status, check, install }` (GitHub Releases; `status` va en `state.update`; acciones `checkUpdate` e `installUpdate`), `consumeShowMark` |
 | `main.js` | `createWindow`, `createOverlay` (transparente, sin clics), `updateOverlay`, `createTray`, `cleanConfig` (valida los parches de configuración), `setupIpc`, `start` |
 | `preload.js` | `window.api`: `init`, `on`, `setConfig`, `setSecret`, `action`, `window` |
 | `companion.js` | `Companion`: `tick` (283), `onPhaseChange`, `onConnected`, `syncCampTimers` (timers nativos), `csTarget`, `refreshLobby` (invitaciones, cola, posiciones), `queueList` (colas disponibles), `refreshRecs`, `refreshCounterBans`, `action` (367), `setSecret`, `state`/`snapshot` |
@@ -57,7 +57,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 ## Interfaz: `src/renderer/`
 | Archivo | Qué contiene |
 |---|---|
-| `index.html`, `app.js` | `App`: navegación y cambio automático de vista según la fase (`PHASE_NAMES`) |
+| `index.html`, `app.js` | `App`: navegación, cambio automático de vista según la fase (`PHASE_NAMES`) y barra de actualización (`paintUpdate`) |
 | `util.js` | `html` (plantilla con escape), `setHtml` (no toca el DOM si no hay cambios), `hydrate` (`data-vars`), `fmt`, `Dd`, `icon`, `objIcon`, nombres de rangos y roles |
 | `ui.js` | `Tip`, `Theme`, `Seg`, `Expand`, `ChampPicker`, gráficas SVG (`lineChart`, `diffChart`, `ring`, `deathMap`, `compareBar`) y estados vacío y cargando |
 | `views/home.js` | Inicio: perfil, LP y Cliente (invitaciones, elegir cola y posiciones en `lobbyBlock`, buscar, «Próxima selección») |

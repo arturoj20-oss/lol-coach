@@ -152,7 +152,7 @@ class Companion extends EventEmitter {
       otp: this.otp.status(),                // recopilacion de builds OTP
       lobby: this.lobby || null,             // invitaciones y cola (Inicio > Cliente)
       // Version y actualizacion automatica (updater.js); sin empaquetar, solo la version
-      update: this.update ? { ...this.update } : { version: require('../../package.json').version, state: 'dev', next: null },
+      update: this.updater ? { ...this.updater.status } : { version: require('../../package.json').version, state: 'dev', next: null },
     };
   }
 
@@ -486,6 +486,13 @@ class Companion extends EventEmitter {
         return this.draft.choose(Number(args.index) || 0);
       case 'hoverChampion':
         return this.draft.hover(args.championId);
+      case 'checkUpdate':
+        return this.updater?.check() ?? false;
+      case 'installUpdate':
+        // No reiniciar en mitad de una seleccion o partida
+        if (['ChampSelect', 'GameStart', 'InProgress', 'Reconnect'].includes(this.phase)) throw new Error('Instálala cuando termine la selección o la partida');
+        if (!this.updater) throw new Error('Esta copia no se actualiza');
+        return this.updater.install(true);
       case 'lockChampion':
         return this.draft.lock(Number(args.championId));
       case 'importBuild':

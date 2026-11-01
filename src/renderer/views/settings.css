@@ -14,6 +14,9 @@
 .theme-seg button { display: inline-flex; align-items: center; gap: 6px; }
 .theme-seg svg { width: 15px; height: 15px; }
 .set-hint { margin: -2px 0 0; padding: 8px 12px; font-size: 13.5px; }
+.update-row { display: flex; align-items: center; gap: 10px; }
+.update-row .grow { flex: 1; min-width: 0; }
+.update-row .btn { flex: none; }
 .key-field { display: flex; flex-direction: column; gap: 8px; }
 .key-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .key-head .tag svg { width: 12px; height: 12px; }

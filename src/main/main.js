@@ -7,7 +7,7 @@ const { Companion } = require('./companion');
 const { initLog, log } = require('./log');
 const { initOpgg } = require('./opgg');
 const { TabWatcher } = require('./keys');
-const { initUpdater } = require('./updater');
+const { initUpdater, consumeShowMark } = require('./updater');
 
 const RENDERER = path.join(__dirname, '..', 'renderer');
 const CHANNELS = ['state', 'champions', 'recs', 'draft', 'scouting', 'live', 'profile', 'postgame', 'otp'];
@@ -33,6 +33,9 @@ function send(channel, data) {
 function showWindow(activate) {
   if (win.isMinimized()) win.restore();
   if (activate) win.show(); else win.showInactive();
+  // Al abrir la ventana, comprobar si hay version nueva (si hace mas de 30 min de la ultima vez)
+  const u = companion?.updater?.status;
+  if (u && u.state !== 'dev' && (!u.checkedAt || Date.now() - u.checkedAt > 30 * 60e3)) companion.updater.check();
 }
 
 // Tema efectivo de la ventana ('system' sigue a Windows)
@@ -222,12 +225,16 @@ async function start() {
     }, 10000);
   });
 
-  // --updated: la abre el actualizador tras instalar en silencio; se queda en la bandeja
-  if (!process.argv.includes('--hidden') && !process.argv.includes('--updated')) win.once('ready-to-show', () => showWindow(true));
-  if (process.argv.includes('--updated')) log(`actualizado a la ${app.getVersion()}`);
-  companion.update = initUpdater({
+  // --updated: la abre el actualizador tras instalar. Si la instalacion la pediste tu (marca), se
+  // muestra la ventana; si fue en silencio, se queda en la bandeja
+  const updated = process.argv.includes('--updated');
+  const showAfterUpdate = consumeShowMark();
+  if ((!process.argv.includes('--hidden') && !updated) || showAfterUpdate) win.once('ready-to-show', () => showWindow(true));
+  if (updated) log(`actualizado a la ${app.getVersion()}`);
+  companion.updater = initUpdater({
     isIdle: () => !companion.state().connected,
     beforeInstall: () => { exiting = true; },
+    onChange: () => send('state', companion.state()),
   });
   await companion.start();
 }

@@ -387,7 +387,8 @@
   // ---------- Escenarios ----------
   const db = {
     config, champions, recs,
-    state: { connected: true, phase: 'Lobby', status: { text: 'En la sala\nEsperando a que empiece la cola', color: 'blue' }, acceptedCount: 3, summoner, keys, ai },
+    state: { connected: true, phase: 'Lobby', status: { text: 'En la sala\nEsperando a que empiece la cola', color: 'blue' }, acceptedCount: 3, summoner, keys, ai,
+      update: { version: '1.2.4', state: 'latest', next: null, percent: null } },
     draft: makeDraft('none'),
     scouting: { active: false, loading: false, error: null, players: [] },
     live,
@@ -646,6 +647,17 @@
           setTimeout(() => emit('live', real), 10000);
           return true;
         }
+        case 'checkUpdate': {
+          // Simula una version nueva: descarga en 2 s y queda lista
+          setState({ update: { version: '1.2.4', state: 'downloading', next: '1.2.5', percent: 0 } });
+          for (const p of [35, 70, 100]) { await delay(600); setState({ update: { ...db.state.update, percent: p } }); }
+          setState({ update: { version: '1.2.4', state: 'ready', next: '1.2.5', percent: 100 } });
+          return true;
+        }
+        case 'installUpdate':
+          await delay(800);
+          setState({ update: { version: '1.2.5', state: 'latest', next: null, percent: null } });
+          return true;
         case 'lockChampion': {
           const d = db.draft;
           if (!d.active) throw new Error('No estás en la selección de campeones');

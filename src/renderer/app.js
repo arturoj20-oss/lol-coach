@@ -171,12 +171,46 @@ const App = {
     };
     for (const v of VIEWS) $(`.tab[data-view="${v.id}"]`)?.classList.toggle('live', !!dots[v.id]);
     if (!state) return;
+    this.paintUpdate(state);
     const color = !state.connected ? 'gray' : state.status?.color || 'gray';
     const phase = state.connected ? (PHASE_NAMES[state.phase] || state.phase || 'Conectado') : 'Cliente cerrado';
     const s = state.summoner;
     setHtml($('#topStatus'), html`
       <span class="conn ${color}" data-tip="${state.status?.text || phase}"><i></i>${phase}</span>
       ${s ? html`<span class="top-me">${icon('profile', s.profileIconId, { size: 28, round: true, name: s.gameName, tip: `${s.gameName}#${s.tagLine} · nivel ${s.level}` })}<span class="me-name">${s.gameName}<span class="muted">#${s.tagLine}</span></span></span>` : ''}`);
+  },
+
+  // Barra de actualizacion (state.update, de updater.js): descargando o lista con «Instalar y reiniciar».
+  // Al abrir, un aviso breve si estas al dia
+  paintUpdate(state) {
+    const u = state.update;
+    const bar = $('#updateBar');
+    if (!u || !bar) return;
+    if (u.state === 'latest' && !this.updateToastShown) {
+      this.updateToastShown = true;
+      this.toast(`LoL Coach está al día (versión ${u.version})`, 'ok');
+    }
+    const show = (u.state === 'downloading' || u.state === 'ready') && this.updateDismissed !== `${u.next}:${u.state}`;
+    if (!show) { bar.hidden = true; return; }
+    bar.hidden = false;
+    const busy = ['ChampSelect', 'GameStart', 'InProgress', 'Reconnect'].includes(state.phase);
+    setHtml(bar, u.state === 'downloading'
+      ? html`<span class="spinner small"></span><span class="grow">Hay una versión nueva: <b class="hi">${u.next}</b> · descargando <b class="num">${u.percent ?? 0} %</b></span>
+          <button class="btn ghost small" data-upd="later">Ocultar</button>`
+      : html`${raw(SVG.arrow)}<span class="grow">La versión <b class="hi">${u.next}</b> está lista para instalar <span class="muted">(tienes la ${u.version})</span></span>
+          <button class="btn ghost small" data-upd="later" data-tip="Se instalará sola al cerrar la app o con el cliente de LoL cerrado">Más tarde</button>
+          <span ${busy ? raw('data-tip="Cuando termine la selección o la partida"') : ''}><button class="btn btn-primary small" data-upd="install" ${busy ? 'disabled' : ''}>Instalar y reiniciar</button></span>`);
+    if (!bar.dataset.bound) {
+      bar.dataset.bound = '1';
+      bar.addEventListener('click', e => {
+        const b = e.target.closest('[data-upd]');
+        if (!b || b.disabled) return;
+        const cur = this.data.state?.update;
+        if (b.dataset.upd === 'later') { this.updateDismissed = `${cur?.next}:${cur?.state}`; bar.hidden = true; return; }
+        b.disabled = true;
+        window.api.action('installUpdate').catch(err => { this.toast(err.message || 'No se pudo instalar', 'error'); b.disabled = false; });
+      });
+    }
   },
 
   // Avisos breves dentro de la ventana
