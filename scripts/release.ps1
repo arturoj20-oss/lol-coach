@@ -16,10 +16,14 @@ $env:GH_TOKEN = $token
 
 git push origin HEAD
 if ($LASTEXITCODE) { throw 'git push ha fallado.' }
-# La etiqueta tiene que existir antes: GitHub no deja crear una release publicada sin ella (422)
+# La etiqueta y la release se crean antes: GitHub no deja crear una release publicada sin etiqueta
+# (422), y electron-builder sube el instalador y el blockmap a la vez y los dos intentaban crear la
+# release (422 already_exists). Con la release ya creada, electron-builder solo sube los archivos
 git tag "v$version"
 git push origin "v$version"
 if ($LASTEXITCODE) { throw 'No se pudo subir la etiqueta.' }
+gh release create "v$version" --title $version --notes "LoL Coach $version" --verify-tag
+if ($LASTEXITCODE) { throw 'No se pudo crear la release en GitHub.' }
 
 # Instalador + latest.yml (lo que lee el actualizador) subidos a la release v<version>
 npx electron-builder --win nsis --publish always
