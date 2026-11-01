@@ -16,11 +16,15 @@ $env:GH_TOKEN = $token
 
 git push origin HEAD
 if ($LASTEXITCODE) { throw 'git push ha fallado.' }
+# La etiqueta tiene que existir antes: GitHub no deja crear una release publicada sin ella (422)
+git tag "v$version"
+git push origin "v$version"
+if ($LASTEXITCODE) { throw 'No se pudo subir la etiqueta.' }
 
 # Instalador + latest.yml (lo que lee el actualizador) subidos a la release v<version>
 npx electron-builder --win nsis --publish always
 if ($LASTEXITCODE) {
-  # La primera vez puede fallar al crear la release en GitHub (dos subidas a la vez): un reintento basta
+  # Por si falla la subida por la red: un reintento
   Write-Host 'Reintentando la subida...'
   npx electron-builder --win nsis --publish always
   if ($LASTEXITCODE) { throw 'electron-builder ha fallado.' }
