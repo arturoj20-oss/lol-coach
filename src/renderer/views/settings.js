@@ -68,6 +68,7 @@ App.register('settings', {
                 <label class="check"><input type="checkbox" data-k="overlay.goldDiff"><span>Oro por línea al pulsar Tab</span></label>
                 <label class="check"><input type="checkbox" data-k="overlay.cs"><span>CS al pulsar Tab (tuyo y diferencia por línea)</span></label>
                 <label class="check"><input type="checkbox" data-k="overlay.skillOrder"><span>Flecha encima de la habilidad a subir</span></label>
+                <label class="check"><input type="checkbox" data-k="overlay.scoutTab"><span>Maestría, posición y premades a los lados del marcador al pulsar Tab</span></label>
               </div></div>
             <div class="checks-col">
               <label class="check"><input type="checkbox" data-k="overlay.sound"><span>Sonido en los avisos</span></label>
@@ -76,6 +77,19 @@ App.register('settings', {
               <div class="field set-range"><span class="label">Tamaño</span>
                 <div class="range-row"><input class="range" type="range" min="0.8" max="1.4" step="0.1" data-k="overlay.scale" aria-label="Tamaño del overlay"><output class="num" data-out="overlay.scale"></output></div></div>
             </div>
+          </div>
+          <div class="sep"></div>
+          <div class="field" data-scout-opts>
+            <span class="label">Etiquetas del marcador (Tab)</span>
+            <p class="muted small set-hint">Para cuadrarlas con tu marcador: entra en el modo práctica, activa «Etiquetas de ejemplo», mantén Tab y mueve los controles hasta que cada etiqueta quede pegada a su fila.</p>
+            <label class="check"><input type="checkbox" data-k="overlay.scoutCalibrate"><span>Etiquetas de ejemplo (para calibrar)</span></label>
+            <label class="check"><input type="checkbox" data-k="overlay.scoutSwap"><span>Mi equipo sale a la derecha del marcador</span></label>
+            <div class="field set-range"><span class="label">Separación del centro</span>
+              <div class="range-row"><input class="range" type="range" min="-400" max="400" step="2" data-k="overlay.scoutX" aria-label="Separación horizontal de las etiquetas"><output class="num" data-out="overlay.scoutX"></output></div></div>
+            <div class="field set-range"><span class="label">Altura</span>
+              <div class="range-row"><input class="range" type="range" min="-400" max="400" step="2" data-k="overlay.scoutY" aria-label="Altura de las etiquetas"><output class="num" data-out="overlay.scoutY"></output></div></div>
+            <div class="field set-range"><span class="label">Espacio entre filas</span>
+              <div class="range-row"><input class="range" type="range" min="-40" max="40" step="1" data-k="overlay.scoutRow" aria-label="Espacio entre filas de las etiquetas"><output class="num" data-out="overlay.scoutRow"></output></div></div>
           </div>
         </section>
 
@@ -194,6 +208,7 @@ App.register('settings', {
       ? html`<span class="tag green">${raw(SVG.check)}${ai.mode === 'api' ? 'Clave lista' : 'Claude Code encontrado'}</span>`
       : html`<span class="tag red">${ai.mode === 'api' ? 'Falta la clave' : 'Claude Code no encontrado'}</span>`);
     $('.overlay-opts', this.el).classList.toggle('disabled', !c.overlay?.enabled);
+    $('[data-scout-opts]', this.el).classList.toggle('disabled', !c.overlay?.enabled || c.overlay?.scoutTab === false);
     // Con el overlay desactivado no se dibuja nada, asi que la prueba no tendria sentido
     const testBtn = $('[data-act="testOverlay"]', this.el);
     testBtn.disabled = !c.overlay?.enabled;
@@ -214,6 +229,7 @@ App.register('settings', {
     if (k === 'acceptDelay') out.textContent = v ? `${v} s` : 'Al instante';
     else if (k === 'csTarget') out.textContent = `${fmt.dec(v)} CS/min${App.data.config?.csAuto !== false ? ' (si no hay datos)' : ''}`;
     else if (k === 'overlay.scale') out.textContent = fmt.pct(v);
+    else if (k === 'overlay.scoutX' || k === 'overlay.scoutY' || k === 'overlay.scoutRow') out.textContent = `${v > 0 ? '+' : ''}${v || 0} px`;
   },
 
   onChange(input) {

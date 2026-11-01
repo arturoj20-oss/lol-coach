@@ -150,7 +150,11 @@ function cleanConfig(patch) {
   if (patch.overlay && typeof patch.overlay === 'object') {
     const o = patch.overlay;
     clean.overlay = {};
-    for (const k of ['enabled', 'objectives', 'goldDiff', 'skillOrder', 'cs', 'sound']) if (k in o) clean.overlay[k] = bool(o[k]);
+    for (const k of ['enabled', 'objectives', 'goldDiff', 'skillOrder', 'cs', 'sound', 'scoutTab', 'scoutSwap', 'scoutCalibrate']) if (k in o) clean.overlay[k] = bool(o[k]);
+    // Ajuste en px de las etiquetas del marcador (separacion, altura y espacio entre filas)
+    if ('scoutX' in o) clean.overlay.scoutX = num(o.scoutX, -400, 400);
+    if ('scoutY' in o) clean.overlay.scoutY = num(o.scoutY, -400, 400);
+    if ('scoutRow' in o) clean.overlay.scoutRow = num(o.scoutRow, -40, 40);
     if ('side' in o && ['left', 'right'].includes(o.side)) clean.overlay.side = o.side;
     if ('scale' in o) clean.overlay.scale = Math.min(1.4, Math.max(0.8, Math.round((Number(o.scale) || 1) * 10) / 10));
     // Desplazamiento vertical (px) del panel de oro que sale encima del marcador al pulsar Tab
@@ -217,10 +221,13 @@ async function start() {
     overlayTest = sample;
     updateOverlay(sample);
     send('live', sample);
+    // Etiquetas del marcador de ejemplo (se ven manteniendo Tab)
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('scouting', require('./scouting').sampleScouting(sample.lanes));
     clearTimeout(start.testTimer);
     start.testTimer = setTimeout(() => {
       overlayTest = null;
       send('live', companion.live.state);
+      if (overlay && !overlay.isDestroyed()) overlay.webContents.send('scouting', companion.scouting.state);
       updateOverlay(companion.live.state);
     }, 10000);
   });

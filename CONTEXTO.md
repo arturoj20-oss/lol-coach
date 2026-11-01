@@ -109,6 +109,20 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
 - 01/11: **publicada la v1.2.3** en GitHub Releases (https://github.com/Artiloked/lol-coach/releases/tag/v1.2.3): primera con actualizaciones automáticas; incluye lo de arriba (colas, posición principal, Fijar/Bloquear, set de support) **sin probar en real**. Tú y tus compañeros tenéis que instalarla a mano una vez desde Releases. La actualización automática de principio a fin se comprobará con la próxima versión (en Ajustes se ve el estado; en `log.txt`, las líneas `actualizar:`). `--publish always` daba 422: sin etiqueta («Published releases must have a valid tag») y por carrera (instalador y blockmap creaban la release a la vez, `already_exists`). `release.ps1` crea la etiqueta y la release con `gh` antes de que electron-builder suba los archivos.
 - 01/11: **publicada la v1.2.4** (sin pestaña Partida y flecha de subir habilidad más clara). Primera que deberían recibir solas las apps con la 1.2.3: falta confirmarlo.
 - 01/11: **publicada la v1.2.5** (aviso al abrir y «Instalar y reiniciar»). Instalador local en `dist\LoL Coach Setup 1.2.5.exe`, idéntico al publicado (mismo SHA-512).
+- **Hecho el 01/11 (v1.2.6, sin probar en partida):** etiquetas de **maestría, posición y premades** a los lados del marcador, **siempre que se mantiene Tab** (decisión del usuario: no solo los 10 primeros segundos; sin cuenta atrás).
+  - Código: `overlay.js` (`renderScout`, `scoutInfo`, constantes `SCOREBOARD`), `scouting.js` (`recentPositions`, `markPremades`, `sampleScouting`). `live.js` añade `riotId` a cada línea y `myTeam`.
+  - La geometría del marcador (`SCOREBOARD`) es **estimada**, sin captura. Se cuadra en Ajustes con `overlay.scoutX/scoutY/scoutRow`, «Mi equipo sale a la derecha» (`scoutSwap`) y «Etiquetas de ejemplo» (`scoutCalibrate`, para el modo práctica, donde no hay scouting). Cuando haya una captura del usuario, medir y fijar los valores por defecto.
+  - «Probar overlay» manda un scouting de ejemplo: se ve manteniendo Tab.
+  - Detalle del diseño aprobado:
+  - Diseño: https://claude.ai/artifact/Ho1T2CV3cLk41aoM2exXAG
+  - Una etiqueta por jugador pegada al borde, a la altura de su fila: tu equipo a la izquierda y los rivales a la derecha.
+  - Contenido: puntos y nivel de maestría; la posición (✓ «En su línea», ⚠ «Suele ir de X», ✕ «Primera vez» si tiene menos de 10 k puntos, «Perfil oculto»); y un icono de enlace de 16 px del color del grupo si es premade (sin texto, mismo tamaño de etiqueta).
+  - Datos:
+    - maestría, de Riot (como `scouting.js`);
+    - posición habitual: la más repetida en las 20 últimas partidas de OP.GG (`lol_list_summoner_matches` con `limit: 20`, `participants[].position`; no gasta la clave de Riot). Está «en su línea» si es la habitual o la juega en al menos el 30 % de sus partidas;
+    - posición en esta partida: la de Live Client;
+    - premades: compartir 2 o más de las 20 últimas partidas (`matchIds`, 10 peticiones) y estar en el mismo equipo ahora. No se usa la sala del cliente, porque sus puuid no valen con la API.
+  - Falta: una captura del Tab del usuario para fijar la geometría (y ver si su equipo sale siempre a la izquierda).
 - Visto en el registro del 01/11 (15:12:48-54, Nami): las runas y el set se reimportaron cada segundo, alternando dos builds. Falta saber si fueron clics del usuario o un bucle.
 - Falta probar en real: el overlay en partida, el scouting, el post-partida automático, el coach de IA en la selección y la vista Historial.
 - `objectives.js`: falta confirmar cuándo se retira el Heraldo. Ahora se supone que se va cuando sale el Barón, a los 20:00.

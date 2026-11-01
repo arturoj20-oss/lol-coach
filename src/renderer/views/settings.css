@@ -9,7 +9,7 @@
 .checks-row { display: flex; gap: 20px; flex-wrap: wrap; }
 .checks-col { display: flex; flex-direction: column; gap: 10px; }
 .overlay-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; transition: opacity var(--dur) var(--ease); }
-.overlay-opts.disabled { opacity: .5; }
+.overlay-opts.disabled, [data-scout-opts].disabled { opacity: .5; }
 .role-seg { flex-wrap: wrap; }
 .theme-seg button { display: inline-flex; align-items: center; gap: 6px; }
 .theme-seg svg { width: 15px; height: 15px; }

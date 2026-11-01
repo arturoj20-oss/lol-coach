@@ -16,6 +16,10 @@ const DEFAULTS = {
     // objectives: aviso 90 s antes de dragon, baron, larvas y heraldo (sin timers en pantalla)
     enabled: true, objectives: true, goldDiff: true, skillOrder: true, cs: true,
     sound: true, side: 'right', scale: 1,
+    // Etiquetas de maestria, posicion y premades a los lados del marcador (Tab). scoutX/Y/Row: ajuste
+    // en px de la posicion estimada del marcador; scoutSwap: tu equipo a la derecha; scoutCalibrate:
+    // etiquetas de ejemplo para cuadrarlas (modo practica)
+    scoutTab: true, scoutX: 0, scoutY: 0, scoutRow: 0, scoutSwap: false, scoutCalibrate: false,
   },
   csTarget: 7,          // objetivo manual de CS/min (si csAuto esta desactivado o no hay datos)
   csAuto: true,         // objetivo de CS segun tu campeon y posicion (U.GG)

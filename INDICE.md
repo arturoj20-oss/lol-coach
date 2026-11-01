@@ -44,7 +44,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `live.js` | `LiveGame`: `poll`, `compute` (129, todo el cálculo de partida), `nextSkill`, `readHudScale` |
 | `objectives.js` | `DEFAULT_TIMES`, `NOTIFY_BEFORE`, `NOTIFY_KEYS`, `LANES` |
 | `keys.js` | `TabWatcher` (koffi + `GetAsyncKeyState`) |
-| `scouting.js` | `Scouting.start(puuid)`: espectador, liga y maestría |
+| `scouting.js` | `Scouting.start(puuid)`: espectador, liga, maestría, posiciones recientes (`recentPositions`, OP.GG) y premades (`markPremades`); `sampleScouting` para «Probar overlay» |
 | `profile.js` | `Profile`: `doRefresh`, `apiPuuid`, `estimateLp` (curva estimada), `recordLp`, `afterGame`, `analyze(matchId)` (302), `tips`; suelta: `summarize` |
 | `riot.js` | `RiotApi` con limitador y caché: `account`, `summoner`, `league`, `matchIds`, `match`, `timeline`, `mastery`, `activeGame`; de otras regiones: `apexLeague`, `topMasteriesOn`, `matchIdsOn`, `matchIdsSince`, `matchOn`, `accountByRiotId`, `accountByPuuid`; `recentCount` |
 | `otp.js` | `OtpBuilds` = mains (segundo plano; datos de la app en `data/mains/*.json.gz` + del equipo en `cache/mains/*.json`: `load`, `merge`, `save` solo de `changed`, `exportOf`, `keyPuuid` para puuids de otra clave): `step` (por campeón en `order()`: `discover` con el leaderboard de OP.GG → `vet` del candidato → `fetchBatch` de su season → `refresh` cada 3 días), `matchup(championId, role, vsId)` (mains contra un rival en la season; lo usa `matchup.js`), `isReady`, `migrate`, `options(championId, role, items)` (con `otp.names` y `otp.matches`; en la interfaz: `otpByline` y `otpMatches`), `summary(championId, role)` (aviso en la interfaz: `otpNote` en `views/select.js`); lo usan `draft.loadBuild` y `champstats.get`; sueltas: `summarize` (partida → resumen), `buildOf` |
@@ -66,7 +66,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `views/patch.js` | Notas del parche: filtros, veredictos y «Tus campeones» |
 | `views/settings.js` | Ajustes |
 | `theme.css`, `app.css`, `views/*.css` | Estilos: tokens en `theme.css` y uno por vista |
-| `overlay.html/.js/.css` | Overlay: `SKILL_BAR` (calibrado), avisos y franja de Tab |
+| `overlay.html/.js/.css` | Overlay: `SKILL_BAR` (calibrado), avisos, franja de Tab (`renderTab`) y etiquetas del marcador (`renderScout`, `scoutInfo`, `SCOREBOARD` estimado) |
 | `mock-api.js` | Datos de ejemplo sin Electron; F9 abre el simulador de fases |
 
 ## Otros

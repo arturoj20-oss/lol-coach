@@ -307,8 +307,9 @@ class LiveGame extends EventEmitter {
       const ac = a.scores?.creepScore || 0, ec = e.scores?.creepScore || 0;
       return {
         position: usePos ? pos : '', isMe: a === me,
-        ally: { championId: this.championIdOf(a), gold: ag, cs: ac },
-        enemy: { championId: this.championIdOf(e), gold: eg, cs: ec },
+        // riotId: para cruzarlo con el scouting (maestria, posicion y premades en el Tab)
+        ally: { championId: this.championIdOf(a), gold: ag, cs: ac, riotId: a.riotId || a.summonerName || '' },
+        enemy: { championId: this.championIdOf(e), gold: eg, cs: ec, riotId: e.riotId || e.summonerName || '' },
         diff: ag - eg, csDiff: ac - ec,
       };
     }).filter(Boolean);
@@ -329,6 +330,7 @@ class LiveGame extends EventEmitter {
 
     return {
       active: true, gameTime, myChampionId,
+      myTeam,   // 'ORDER' (azul) | 'CHAOS' (rojo)
       objectives, buffs: buffs.filter(b => b.endsAt > gameTime),
       gold, lanes, cs, skillToLevel, hudScale: this.hudScale ?? 1, itemAdvice,
       events: log.slice(-6),

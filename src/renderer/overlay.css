@@ -110,6 +110,33 @@ body { font: 600 12px/1.25 'Source Sans 3', 'Segoe UI', sans-serif; color: var(-
 .ov-toast .obj-ico, .ov-toast svg { width: 32px; height: 32px; flex: none; color: var(--blue-2); }
 .ov-toast.objective { background: linear-gradient(90deg, rgba(70, 55, 20, .95), rgba(1, 10, 19, .92)) padding-box, linear-gradient(90deg, #F0E6D2, #C89B3C 40%, #785A28) border-box; box-shadow: 0 0 14px rgba(200, 155, 60, .5), 0 2px 10px rgba(0, 0, 0, .6); }
 
+/* ---------- Maestria, posicion y premades a los lados del marcador (Tab) ----------
+   Cada etiqueta se coloca en overlay.js (right/left y --y) pegada al borde de su mitad del marcador,
+   centrada en la altura de la fila de su jugador; --u = unidad del HUD (escala con la resolucion) */
+.ov-scout[hidden] { display: none; }
+.ov-scout-tag {
+  position: fixed; top: var(--y);
+  transform: translateY(-50%) scale(var(--u, 1));
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 5px 9px;
+  border: 1px solid var(--gold-5);
+  text-shadow: 0 1px 2px #000;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+/* El fondo se funde hacia el marcador */
+.ov-scout-tag.l { align-items: flex-end; transform-origin: 100% 50%; background: linear-gradient(270deg, rgba(10, 20, 40, .92), rgba(1, 10, 19, .78)); }
+.ov-scout-tag.r { align-items: flex-start; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(10, 20, 40, .92), rgba(1, 10, 19, .78)); }
+.ov-scout-tag.me { border-color: var(--gold-3); }
+.ov-scout-top { display: flex; align-items: center; gap: 4px; color: var(--gold-1); font-size: 15px; }
+.ov-scout-top b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.ov-scout-lvl { font-size: 12px; color: #8a8678; }
+.ov-scout-pos { font-size: 13px; }
+.ov-scout-pos.win { color: var(--win); }
+.ov-scout-pos.warn { color: var(--warn); }
+.ov-scout-pos.loss { color: var(--loss); }
+.ov-scout-link { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--c, var(--gold-3)); stroke-width: 1.7; stroke-linecap: round; opacity: .9; }
+
 /* ---------- Oro por linea al mantener Tab: centrado, justo encima del marcador del juego ---------- */
 .ov-tab {
   /* Columna en el lateral (el del overlay), a media altura: en el centro tapaba los objetivos del marcador */
