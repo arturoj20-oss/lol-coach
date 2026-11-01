@@ -7,7 +7,5 @@ dist/
 riot-key.txt
 config.json
 
-# Notas privadas del proyecto (solo en local, decision del usuario)
-CONTEXTO.md
-INDICE.md
+# Historico largo del proyecto (solo en local); CONTEXTO.md e INDICE.md si se suben
 docs/contexto-historico.md
