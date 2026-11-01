@@ -19,7 +19,12 @@ if ($LASTEXITCODE) { throw 'git push ha fallado.' }
 
 # Instalador + latest.yml (lo que lee el actualizador) subidos a la release v<version>
 npx electron-builder --win nsis --publish always
-if ($LASTEXITCODE) { throw 'electron-builder ha fallado.' }
+if ($LASTEXITCODE) {
+  # La primera vez puede fallar al crear la release en GitHub (dos subidas a la vez): un reintento basta
+  Write-Host 'Reintentando la subida...'
+  npx electron-builder --win nsis --publish always
+  if ($LASTEXITCODE) { throw 'electron-builder ha fallado.' }
+}
 
 git fetch --tags --quiet
 Write-Host "Publicada la v$version"
