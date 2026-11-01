@@ -49,18 +49,20 @@ body { font: 600 12px/1.25 'Source Sans 3', 'Segoe UI', sans-serif; color: var(-
   transform: translate(-50%, -100%) scale(calc(var(--u, 1) * 1.7));
   transform-origin: 50% 100%;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
-  opacity: .6;
+  /* Opaca y clara (antes al 60 % y en dorado oscuro: se veia apagada sobre el HUD) */
+  opacity: 1;
   animation: skill-bob 1.2s ease-in-out infinite;
 }
 .ov-skill[hidden] { display: none; }
-.ov-skill svg { width: 22px; height: 14px; fill: var(--gold-3); stroke: #010A13; stroke-width: 1.5; filter: drop-shadow(0 0 3px rgba(200, 170, 110, .7)); }
+.ov-skill svg { width: 22px; height: 14px; fill: #FFE9A8; stroke: #010A13; stroke-width: 1.5;
+  filter: drop-shadow(0 0 2px rgba(255, 233, 168, 1)) drop-shadow(0 0 5px rgba(240, 200, 110, .9)); }
 .ov-skill.key-Q .ov-skill-key::after { content: 'Q'; }
 .ov-skill.key-W .ov-skill-key::after { content: 'W'; }
 .ov-skill.key-E .ov-skill-key::after { content: 'E'; }
 .ov-skill.key-R .ov-skill-key::after { content: 'R'; }
 /* Sin letra: la flecha ya esta encima de la habilidad y la letra pisaba el "¡Sube de nivel!" del juego */
 .ov-skill-key { display: none; }
-.ov-skill.key-R svg { fill: var(--blue-2); filter: drop-shadow(0 0 3px rgba(10, 200, 185, .7)); }
+.ov-skill.key-R svg { fill: #7DF9EC; filter: drop-shadow(0 0 2px rgba(125, 249, 236, 1)) drop-shadow(0 0 5px rgba(10, 200, 185, .9)); }
 @keyframes skill-bob { 50% { margin-top: -4px; } }
 
 /* Fila de juego: CS/min y habilidad a subir, en una linea */

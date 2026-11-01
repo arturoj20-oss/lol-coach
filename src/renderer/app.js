@@ -11,7 +11,6 @@ const PHASE_NAMES = {
 const VIEWS = [
   { id: 'home', label: 'Inicio' },
   { id: 'select', label: 'Campeones' },
-  { id: 'game', label: 'Partida' },
   { id: 'history', label: 'Historial' },
   { id: 'patch', label: 'Parche' },
   { id: 'settings', label: 'Ajustes' },
@@ -23,8 +22,6 @@ const App = {
   current: null,
   lastPhase: null,
   lastPostgameId: null,
-  scoutingWasActive: false,
-  liveWasActive: false,
 
   // Cada vista se registra con { channels, mount(el), update(channel) }
   register(id, view) { this.views[id] = view; },
@@ -54,10 +51,8 @@ const App = {
     const phase = snap.state?.phase;
     this.lastPhase = phase;
     this.lastPostgameId = snap.postgame?.analysis?.matchId || null;
-    this.scoutingWasActive = !!snap.scouting?.active;
-    this.liveWasActive = !!snap.live?.active;
+    // Sin vista de partida (decision del usuario: esa informacion ya se ve en el juego y en el overlay)
     if (phase === 'ChampSelect') this.go('select');
-    else if (phase === 'InProgress' || phase === 'GameStart' || snap.live?.active || snap.scouting?.active) this.go('game');
     else this.go('home');
 
     this.paintTopbar();
@@ -85,15 +80,6 @@ const App = {
     if (channel === 'state' && data.phase !== this.lastPhase) {
       this.lastPhase = data.phase;
       if (data.phase === 'ChampSelect') this.go('select');
-      else if (data.phase === 'GameStart' || data.phase === 'InProgress') this.go('game');
-    }
-    if (channel === 'scouting') {
-      if (data.active && !this.scoutingWasActive) this.go('game');
-      this.scoutingWasActive = !!data.active;
-    }
-    if (channel === 'live') {
-      if (data.active && !this.liveWasActive) this.go('game');
-      this.liveWasActive = !!data.active;
     }
     if (channel === 'postgame' && data.analysis && data.analysis.matchId !== this.lastPostgameId) {
       this.lastPostgameId = data.analysis.matchId;
@@ -178,10 +164,9 @@ const App = {
   },
 
   paintTopbar() {
-    const { state, draft, live, scouting } = this.data;
+    const { state, draft } = this.data;
     const dots = {
       select: !!draft?.active,
-      game: !!(live?.active || scouting?.active),
       history: !!this.newPostgame,
     };
     for (const v of VIEWS) $(`.tab[data-view="${v.id}"]`)?.classList.toggle('live', !!dots[v.id]);

@@ -62,7 +62,6 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `ui.js` | `Tip`, `Theme`, `Seg`, `Expand`, `ChampPicker`, gráficas SVG (`lineChart`, `diffChart`, `ring`, `deathMap`, `compareBar`) y estados vacío y cargando |
 | `views/home.js` | Inicio: perfil, LP y Cliente (invitaciones, elegir cola y posiciones en `lobbyBlock`, buscar, «Próxima selección») |
 | `views/select.js` | Campeones: Mi selección y el explorador; `champButtons` (Fijar/Bloquear), `buildPanel` (maestro-detalle de builds), `runesView`, `skillsView`, `itemLayout`, `contextBlock` |
-| `views/game.js` | Partida: timers de objetivos, oro, CS y objetos según la composición |
 | `views/history.js` | Historial y análisis post-partida con el coach (`miniMarkdown`) |
 | `views/patch.js` | Notas del parche: filtros, veredictos y «Tus campeones» |
 | `views/settings.js` | Ajustes |

@@ -30,6 +30,7 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
 - ❌ Timers de jungla propios, ya sea marcando a mano o leyendo el minimapa. La app activa los **nativos** (`HUD.MinimapEnableAllTimers`).
 - ❌ Overwolf. Tampoco destripar iTero ni Overwolf.
 - ❌ Objetos recomendados por IA en partida.
+- ❌ Pestaña «Partida» en la ventana (quitada el 01/11): esa información ya se ve en el juego y en el overlay. Con ella se fue la vista del scouting de la pantalla de carga; `scouting.js` y `live.js` siguen funcionando por dentro (el overlay usa `live`).
 - ❌ Timers completos o siguiente objeto en el overlay.
 - ❌ Usar el historial del cliente cuando no hay clave. Si se comparte la app, cada persona pone sus propias claves. La app se comparte con compañeros y cada uno tiene su propia clave personal de Riot. Los datos de mains del instalador (`data/mains`) son de la clave del usuario: se le avisó de que, estrictamente, eso queda fuera del uso personal, aunque con riesgo bajo.
 - ❌ IA en las notas del parche, para que también las lea quien no tiene Claude.
