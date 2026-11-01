@@ -1,0 +1,59 @@
+{
+  "name": "lol-coach",
+  "productName": "LoL Coach",
+  "version": "1.2.3",
+  "private": true,
+  "description": "Asistente personal para League of Legends: seleccion de campeones, overlay de partida y analisis post-partida",
+  "author": "Artiloked",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --publish never",
+    "release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1",
+    "export-mains": "node scripts/export-mains.js",
+    "mains-worker": "node scripts/mains-worker.js",
+    "mains-worker:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mains-worker-task.ps1 install",
+    "mains-worker:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mains-worker-task.ps1 uninstall",
+    "mains-worker:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mains-worker-task.ps1 status"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "electron-updater": "^6.8.11",
+    "koffi": "^3.3.4"
+  },
+  "build": {
+    "appId": "com.artiloked.lolcoach",
+    "productName": "LoL Coach",
+    "publish": [
+      { "provider": "github", "owner": "Artiloked", "repo": "lol-coach", "releaseType": "release" }
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "data/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/koffi/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "LoL Coach",
+      "runAfterFinish": true
+    }
+  }
+}

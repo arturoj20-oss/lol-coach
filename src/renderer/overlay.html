@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://ddragon.leagueoflegends.com https://raw.communitydragon.org">
+  <title>LoL Coach - Overlay</title>
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <!-- Oro de cada linea contra su rival: solo mientras se mantiene Tab (encima del marcador) -->
+  <div id="tabgold" class="ov-tab" hidden></div>
+  <!-- Flecha encima de la habilidad a subir (barra de habilidades del juego) -->
+  <div id="skill" class="ov-skill" hidden><span class="ov-skill-key"></span><svg viewBox="0 0 24 16" aria-hidden="true"><path d="M2 2h20L12 14z"/></svg></div>
+  <div id="hud" class="hud right" hidden>
+    <div id="toast" class="ov-toast" aria-live="assertive"></div>
+    <div id="panel" class="ov-panel"></div>
+  </div>
+
+  <script src="mock-api.js"></script>
+  <script src="util.js"></script>
+  <script src="overlay.js"></script>
+</body>
+</html>

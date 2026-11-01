@@ -1,0 +1,31 @@
+/* =========================== AJUSTES =========================== */
+.settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.settings .card { display: flex; flex-direction: column; gap: 14px; }
+.settings .card-head { margin-bottom: 0; }
+.settings .sep { margin: 2px 0; }
+.range-row { display: flex; align-items: center; gap: 14px; }
+.range-row output { min-width: 90px; text-align: right; color: var(--text-hi); font-weight: 600; }
+.set-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.checks-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.checks-col { display: flex; flex-direction: column; gap: 10px; }
+.overlay-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; transition: opacity var(--dur) var(--ease); }
+.overlay-opts.disabled { opacity: .5; }
+.role-seg { flex-wrap: wrap; }
+.theme-seg button { display: inline-flex; align-items: center; gap: 6px; }
+.theme-seg svg { width: 15px; height: 15px; }
+.set-hint { margin: -2px 0 0; padding: 8px 12px; font-size: 13.5px; }
+.key-field { display: flex; flex-direction: column; gap: 8px; }
+.key-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.key-head .tag svg { width: 12px; height: 12px; }
+.key-row { display: flex; gap: 8px; }
+.key-row .input { flex: 1; font-family: Consolas, monospace; font-size: 13.5px; }
+.key-note { margin: 0; }
+.key-msg { min-height: 18px; }
+
+@media (max-width: 1150px) {
+  .overlay-opts { grid-template-columns: 1fr; }
+  .set-two { grid-template-columns: 1fr; }
+}
+
+/* Objetivo de CS manual cuando el automatico esta activo: solo de respaldo */
+.range-row.is-fallback { opacity: .55; }

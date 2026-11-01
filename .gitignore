@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.log
+*.tmp
+.env
+# Datos del usuario: viven en %APPDATA%\LoL Coach, nunca en el repositorio
+riot-key.txt
+config.json
+
+# Notas privadas del proyecto (solo en local, decision del usuario)
+CONTEXTO.md
+INDICE.md
+docs/contexto-historico.md

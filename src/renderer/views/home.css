@@ -1,0 +1,146 @@
+/* =========================== INICIO =========================== */
+.home {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px 20px;
+  height: 100%;
+  min-height: 600px;
+}
+.home-left, .home-right { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.home-left > .card:last-child { flex: 1; display: flex; flex-direction: column; }
+.lp-card { flex: 1; display: flex; flex-direction: column; min-height: 200px; }
+.home-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px; }
+
+/* Perfil */
+.profile-head { display: flex; align-items: center; gap: 14px; }
+.profile-head .icon-btn { align-self: flex-start; margin-left: auto; }
+.avatar { position: relative; flex: none; padding: 2px; border-radius: 50%; background: var(--accent); }
+.avatar .ico { border: 2px solid var(--surface); }
+.avatar .lvl {
+  position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%);
+  min-width: 36px; padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-hi);
+  font-size: 12px; font-weight: 700; text-align: center;
+}
+.profile-name { font: 700 20px/1.2 var(--font-body); color: var(--text-hi); word-break: break-word; }
+.profile-upd { font-size: 13px; margin-top: 2px; }
+.rank-list { display: flex; flex-direction: column; gap: 8px; }
+.rank-row { display: flex; align-items: center; gap: 12px; padding: 6px 8px; border-radius: var(--radius-sm); background: var(--surface-2); }
+.emblem { position: relative; flex: none; width: 56px; height: 52px; overflow: hidden; }
+/* Los emblemas nuevos traen mucho margen transparente: se amplian y recortan */
+.emblem img { position: absolute; left: 50%; top: 50%; width: 160px; height: auto; transform: translate(-50%, -50%); }
+.emblem.unranked { border: 1px solid var(--border-strong); transform: rotate(45deg) scale(.55); }
+.rank-info { min-width: 0; }
+.rank-name { color: var(--text-hi); font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+.rank-sub { font-size: 13px; color: var(--text-muted); }
+.rank-sub .gold { font-weight: 700; }
+
+/* Cliente */
+.client-status { padding: 10px 12px; border-left: 3px solid var(--grey-2); border-radius: var(--radius-sm); background: var(--surface-2); }
+.client-status.green { border-left-color: var(--ok); }
+.client-status.blue { border-left-color: var(--accent-2); }
+.client-status.red { border-left-color: var(--loss); }
+.cs-main { color: var(--text-hi); font-weight: 600; font-size: 15px; }
+.cs-sub { color: var(--text-muted); font-size: 13px; }
+.client-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 14px; font-size: 13px; }
+#homeClient .switch { margin: 2px 0; }
+#homeClient { display: flex; flex-direction: column; gap: 12px; }
+.client-card { gap: 12px; }
+.client-foot { margin-top: 0; padding-top: 2px; }
+/* Baneos que hacen counter a la preseleccion */
+.counter-bans:empty { display: none; }
+.counter-bans { margin-top: -4px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--surface-2); }
+.cb-title { color: var(--text); font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.cb-list { display: flex; gap: 6px; flex-wrap: wrap; }
+.cb-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; border: 1px solid transparent; border-radius: var(--radius-sm); background: none; cursor: pointer; transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
+.cb-btn:hover { background: var(--surface-3); }
+.cb-btn.on { border-color: var(--loss); background: var(--loss-soft, transparent); }
+.cb-val { font-size: 12px; font-weight: 700; color: var(--loss-text, var(--loss)); }
+.cb-sub { font-size: 12px; margin-top: 4px; }
+.quick-title { margin: 12px 0 10px; color: var(--text-hi); font-size: 15px; font-weight: 700; }
+
+/* LP */
+.lp-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: -4px 0 8px; }
+.lp-now { font: 700 20px/1.2 var(--font-body); color: var(--text-hi); }
+.lp-lp { font-size: 16px; font-weight: 700; color: var(--accent-text); }
+
+/* Ultimas partidas */
+.recent { display: flex; align-items: center; gap: 18px; }
+.recent-ring { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 700; }
+.stat-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.stat { display: flex; flex-direction: column; }
+.stat-v { font-size: 20px; font-weight: 700; color: var(--text-hi); line-height: 1.1; }
+.stat-l { font-size: 13px; color: var(--text-muted); }
+.streak { display: flex; gap: 3px; margin: 14px 0 12px; }
+.streak button {
+  flex: 1; height: 10px; padding: 0; border: 0; border-radius: 2px;
+  background: var(--grey-3); cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease);
+}
+.streak button.w { background: var(--win); }
+.streak button.l { background: var(--loss); }
+.streak button:hover { transform: scaleY(1.6); filter: brightness(1.15); }
+.roles { display: flex; flex-direction: column; gap: 6px; }
+.role-row { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 10px; font-size: 13px; color: var(--text); }
+
+/* Campeones (filas desplegables) */
+.champ-list { display: flex; flex-direction: column; gap: 2px; }
+.champ-xp.open { background: var(--surface-2); }
+.champ-row {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) 64px 46px 50px 18px; align-items: center; gap: 10px;
+  width: 100%; padding: 5px 6px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; text-align: left; font-size: 14px;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.champ-row:hover { background: var(--surface-3); }
+.champ-main { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.champ-main span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.champ-main .hi { font-weight: 600; }
+.champ-main .muted { font-size: 13px; }
+.champ-wr { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 14px; }
+.champ-stat { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
+.champ-stat .hi { font-weight: 600; }
+.champ-stat .muted { font-size: 12px; }
+.champ-games { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 4px 6px 10px 52px; }
+.mini-match {
+  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  padding: 4px 8px; border: 0; border-left: 3px solid var(--grey-2); border-radius: 4px;
+  background: var(--surface); font-size: 13px; cursor: pointer; line-height: 1.2;
+  transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.mini-match.w { border-left-color: var(--win); }
+.mini-match.l { border-left-color: var(--loss); }
+.mini-match b { color: var(--text-hi); }
+.mini-match .muted { font-size: 12px; }
+.mini-match:hover { background: var(--surface-3); transform: translateY(-1px); }
+.champ-games .btn { margin-left: auto; }
+
+@media (max-width: 1150px) {
+  .home { grid-template-columns: 290px minmax(0, 1fr); }
+  .champ-row { grid-template-columns: 32px minmax(0, 1fr) 56px 44px 18px; }
+  .champ-row .champ-stat:nth-of-type(5) { display: none; }
+  .recent { gap: 12px; }
+  .stat-v { font-size: 18px; }
+}
+
+/* Inicio > Cliente: invitaciones a salas y cola */
+.invite-pop {
+  display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px;
+  border: 1px solid var(--accent-2);
+  border-radius: var(--radius-sm);
+  background: var(--accent-2-soft);
+  animation: invite-in .25s var(--ease);
+}
+.invite-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.invite-txt b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.invite-btns { display: flex; gap: 6px; flex: none; }
+@keyframes invite-in { from { opacity: 0; transform: translateY(-6px); } }
+.queue-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.queue-row > span[data-tip] { display: inline-flex; }
+.queue-row > span[data-tip] > .btn:disabled { pointer-events: none; }
+.queue-row .select.grow, .queue-row .field.grow { flex: 1; min-width: 0; }
+.queue-pos { align-items: flex-end; }
+.queue-pos .field { display: flex; flex-direction: column; gap: 4px; }

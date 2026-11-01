@@ -1,0 +1,180 @@
+/* LoL Coach - ventana principal: estructura, barra superior, graficas y toasts */
+
+body {
+  display: grid;
+  grid-template-rows: 56px minmax(0, 1fr);
+  /* Sin esto el contenido de la barra superior puede ensanchar toda la ventana */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ico { width: var(--s, 36px); height: var(--s, 36px); }
+.small { font-size: 13px; }
+.pad { padding: 8px 0; margin: 0; }
+.spacer { flex: 1; }
+.center-fill { display: grid; place-items: center; height: 100%; }
+.link { border: 0; padding: 0; background: none; color: var(--accent-2-text); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.link:hover { color: var(--text-hi); }
+.spinner.inline { display: inline-block; vertical-align: middle; margin-right: 6px; }
+
+/* ---------- Barra superior (arrastrable) ---------- */
+.topbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  height: 56px;
+  padding-left: 14px;
+  background: var(--topbar);
+  border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 20px;
+  margin-right: 8px;
+  font: 700 15px/1 var(--font-title);
+  letter-spacing: .06em;
+  color: var(--text-hi);
+  white-space: nowrap;
+}
+.brand svg { width: 28px; height: 28px; }
+/* Logo: rombo con nucleo turquesa, colores segun el tema */
+.logo-a { fill: var(--surface); stroke: var(--accent); }
+.logo-b { fill: none; stroke: var(--gold-5); }
+.logo-c { fill: var(--accent-2); }
+
+.tabs { position: relative; display: flex; align-items: center; gap: 2px; -webkit-app-region: no-drag; }
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font: 600 15px/1 var(--font-body);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.tab:hover { color: var(--text-hi); background: var(--surface-3); }
+.tab:active { transform: scale(.96); }
+.tab.active { color: var(--text-hi); }
+/* Indicador de la pestaña activa: se desliza con JS (--tab-x / --tab-w) */
+.tab-ind {
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 3px;
+  width: var(--tab-w, 0);
+  transform: translateX(var(--tab-x, 0));
+  border-radius: 3px 3px 0 0;
+  background: var(--accent);
+  pointer-events: none;
+  transition: transform var(--dur) var(--ease), width var(--dur) var(--ease);
+}
+.tab-ind.no-anim { transition: none; }
+.tab-dot { display: none; width: 7px; height: 7px; transform: rotate(45deg); background: var(--accent-2); animation: pulse 1.4s ease-in-out infinite; }
+.tab.live .tab-dot { display: inline-block; }
+.drag-fill { flex: 1; }
+.top-status { display: flex; align-items: center; gap: 14px; padding: 0 12px; min-width: 0; -webkit-app-region: no-drag; }
+.conn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  height: 28px; padding: 0 10px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap;
+}
+.conn i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--grey-2); }
+.conn.green i { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+.conn.blue i { background: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-2-soft); animation: pulse 1.6s ease-in-out infinite; }
+.conn.red i { background: var(--loss); box-shadow: 0 0 0 3px var(--loss-soft); }
+.conn.green, .conn.blue { color: var(--text-hi); }
+.top-me { display: flex; align-items: center; gap: 8px; }
+.top-me .ico { border-color: var(--accent); }
+.me-name { color: var(--text-hi); font-weight: 600; white-space: nowrap; }
+.winctl { display: flex; align-items: center; gap: 2px; padding: 0 8px; border-left: 1px solid var(--border); -webkit-app-region: no-drag; }
+.winctl .close:hover { color: #FFFFFF; background: #D9354C; }
+@media (max-width: 1150px) {
+  .brand span { display: none; }
+  .brand { padding-right: 10px; }
+  .tab { padding: 0 11px; }
+  .me-name { display: none; }
+}
+
+/* ---------- Vistas ---------- */
+#views { position: relative; min-height: 0; }
+.view { position: absolute; inset: 0; overflow: auto; }
+.view[hidden] { display: none; }
+/* Entrada suave al cambiar de vista */
+.view.entering { animation: rise-in var(--dur) var(--ease); }
+.view-pad { padding: 18px 20px; min-height: 100%; }
+.view-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; }
+.view-head h1 { margin: 0; font-size: 22px; }
+.view-head .spinner { align-self: center; }
+
+.bar { position: relative; display: block; height: 5px; border-radius: 5px; overflow: hidden; background: var(--surface-3); }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); border-radius: 5px; background: var(--accent); }
+.bar i.w { background: var(--win); }
+.bar i.l { background: var(--loss); }
+
+.skel-row { display: flex; gap: 10px; align-items: center; }
+.line-skel { display: block; height: 12px; width: 100%; }
+.line-skel.short { width: 60%; }
+.ico-skel { width: 40px; height: 40px; flex: none; }
+.block-skel { height: 120px; }
+.rank-skel { width: 56px; height: 56px; flex: none; }
+
+/* Graficas */
+.chart { display: block; overflow: visible; }
+.chart .grid { stroke: var(--chart-grid); stroke-width: 1; }
+.chart .zero { stroke: var(--gold-5); stroke-width: 1; }
+.chart .axis { fill: var(--text-muted); font-size: 12px; font-family: var(--font-body); }
+.chart .line { fill: none; stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; }
+.chart .line.gold { stroke: var(--accent); }
+.chart .line.pos { stroke: var(--win); }
+.chart .line.neg { stroke: var(--loss); }
+.chart .area.pos { fill: var(--win-soft); }
+.chart .area.neg { fill: var(--loss-soft); }
+.chart .fill-stop { stop-color: var(--accent); }
+.chart .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 1.5; }
+.chart .dot.last { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.chart .guide { stroke: var(--text-hi); stroke-dasharray: 3 3; opacity: 0; transition: opacity var(--dur-fast); }
+.chart:hover .guide { opacity: .5; }
+.chart .hit { fill: transparent; cursor: crosshair; }
+.chart-box { position: relative; flex: 1; min-height: 120px; }
+.chart-empty { flex: 1; display: grid; place-items: center; }
+.ring .ring-bg { fill: none; stroke: var(--surface-3); stroke-width: 7; }
+.ring .ring-loss { fill: none; stroke: var(--loss); stroke-opacity: .55; stroke-width: 6; }
+.ring .ring-win { fill: none; stroke: var(--win); stroke-width: 6; stroke-linecap: round; }
+.ring .ring-text { fill: var(--text-hi); font: 700 17px var(--font-body); }
+
+/* ---------- Toasts de la ventana ---------- */
+#toasts { position: fixed; right: 16px; bottom: 16px; z-index: 900; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  min-width: 240px; max-width: 380px;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-hi);
+  opacity: 0; transform: translateX(20px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.toast.show { opacity: 1; transform: none; }
+.toast svg { width: 16px; height: 16px; flex: none; color: var(--accent-2); }
+.toast.ok { border-left-color: var(--ok); }
+.toast.ok svg { color: var(--ok); }
+.toast.error { border-left-color: var(--loss); }
+.toast.error svg { color: var(--loss); }
+
+/* Los botones desactivados no reciben el raton: el tooltip lo muestra su envoltorio */
+.ai-card [data-tip] > .btn:disabled, .test-wrap > .btn:disabled { pointer-events: none; }
+.ai-card [data-tip], .test-wrap { display: inline-flex; }
