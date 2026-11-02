@@ -123,6 +123,7 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
     - posición en esta partida: la de Live Client;
     - premades: compartir 2 o más de las 20 últimas partidas (`matchIds`, 10 peticiones) y estar en el mismo equipo ahora. No se usa la sala del cliente, porque sus puuid no valen con la API.
   - Falta: una captura del Tab del usuario para fijar la geometría (y ver si su equipo sale siempre a la izquierda).
+  - 02/11, el usuario lo probó en partida: las etiquetas salen **demasiado al centro y tapan los objetos** de cada campeón, y los premades fallaban. Arreglado (sin probar): las partidas compartidas solo cuentan si iban **en el mismo equipo** (se descargan hasta 4 por pareja; se registran los grupos en `log.txt`). Tab se vigila también con el oro por línea desactivado. La geometría sigue pendiente de la captura.
 - Visto en el registro del 01/11 (15:12:48-54, Nami): las runas y el set se reimportaron cada segundo, alternando dos builds. Falta saber si fueron clics del usuario o un bucle.
 - Falta probar en real: el overlay en partida, el scouting, el post-partida automático, el coach de IA en la selección y la vista Historial.
 - `objectives.js`: falta confirmar cuándo se retira el Heraldo. Ahora se supone que se va cuando sale el Barón, a los 20:00.

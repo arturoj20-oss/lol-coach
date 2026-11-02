@@ -33,18 +33,36 @@ async function recentPositions(riotId, platform) {
   return games ? { counts, games } : null;
 }
 
+// Partidas compartidas que se miran para confirmar que iban en el mismo equipo
+const PREMADE_CHECK = 4;
+
 // Grupos de premades por equipo: dos jugadores van juntos si comparten PREMADE_SHARED partidas
-// recientes (ids de Riot). Asigna player.group = 1, 2... (por equipo) a los que van en grupo
-function markPremades(players) {
+// recientes (ids de Riot) EN EL MISMO EQUIPO (se descarga cada partida compartida, con cache en
+// disco; coincidir como rivales no cuenta). Asigna player.group = 1, 2... (por equipo)
+async function markPremades(players, riot) {
+  const teamOf = async (id, puuid) => {
+    const m = await riot.match(id).catch(() => null);
+    return m?.info?.participants?.find(x => x.puuid === puuid)?.teamId ?? null;
+  };
+  const together = async (a, b) => {
+    const ids = new Set(b.recentIds);
+    const shared = a.recentIds.filter(id => ids.has(id)).slice(0, PREMADE_CHECK);
+    if (shared.length < PREMADE_SHARED) return false;
+    let same = 0;
+    for (const id of shared) {
+      const [ta, tb] = await Promise.all([teamOf(id, a.puuid), teamOf(id, b.puuid)]);
+      if (ta != null && ta === tb && ++same >= PREMADE_SHARED) return true;
+    }
+    return false;
+  };
   for (const team of ['ally', 'enemy']) {
-    const list = players.filter(p => p.team === team && p.recentIds?.length);
+    const list = players.filter(p => p.team === team && p.puuid && p.recentIds?.length);
     const parent = new Map(list.map(p => [p, p]));
     const root = p => { while (parent.get(p) !== p) p = parent.get(p); return p; };
     for (let i = 0; i < list.length; i++) {
-      const ids = new Set(list[i].recentIds);
       for (let j = i + 1; j < list.length; j++) {
-        const shared = list[j].recentIds.filter(id => ids.has(id)).length;
-        if (shared >= PREMADE_SHARED) parent.set(root(list[j]), root(list[i]));
+        if (root(list[i]) === root(list[j])) continue;
+        if (await together(list[i], list[j])) parent.set(root(list[j]), root(list[i]));
       }
     }
     const groups = new Map();
@@ -60,7 +78,7 @@ function markPremades(players) {
       for (const p of members) { p.group = n; p.groupSize = members.length; }
     }
   }
-  for (const p of players) delete p.recentIds;
+  for (const p of players) { delete p.recentIds; delete p.puuid; }
 }
 
 function emptyState() {
@@ -127,7 +145,7 @@ class Scouting extends EventEmitter {
       const extra = Promise.all([
         recentPositions(p.riotId, this.riot.platform).catch(e => { log(`scouting ${p.riotId}: posiciones: ${e.message}`); return null; }),
         this.riot.matchIds(p.puuid, 20).catch(() => null),
-      ]).then(([positions, ids]) => { player.positions = positions; player.recentIds = ids || []; });
+      ]).then(([positions, ids]) => { player.positions = positions; player.recentIds = ids || []; player.puuid = p.puuid; });
       try {
         const [entries, mastery, top] = await Promise.all([
           this.riot.league(p.puuid), this.riot.mastery(p.puuid, p.championId), this.riot.topMasteries(p.puuid, 2),
@@ -155,7 +173,9 @@ class Scouting extends EventEmitter {
       return player;
     });
     if (this.gameKey !== key) return;
-    markPremades(players);
+    await markPremades(players, this.riot);
+    if (this.gameKey !== key) return;
+    for (const p of players.filter(x => x.group)) log(`scouting: premade ${p.team} grupo ${p.group}: ${p.riotId}`);
     this.state = { active: true, loading: false, error: null, players };
     this.emitState();
   }

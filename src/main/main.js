@@ -100,8 +100,9 @@ function updateOverlay(live) {
   const want = overlayTest || (config.get().overlay.enabled && live?.active);
   if (want && !overlay.isVisible()) overlay.showInactive();
   if (!want && overlay.isVisible()) overlay.hide();
-  // La tecla Tab solo se mira con el overlay a la vista y el oro por linea activado
-  if (want && config.get().overlay.goldDiff !== false) tab.start(); else tab.stop();
+  // La tecla Tab solo se mira con el overlay a la vista y el oro por linea o las etiquetas activados
+  const o = config.get().overlay;
+  if (want && (o.goldDiff !== false || o.scoutTab !== false)) tab.start(); else tab.stop();
 }
 
 function createTray(icon) {
