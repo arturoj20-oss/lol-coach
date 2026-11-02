@@ -27,7 +27,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | Archivo | Qué contiene (funciones clave) |
 |---|---|
 | `updater.js` | `initUpdater({ isIdle, beforeInstall, onChange })` → `{ status, check, install }` (GitHub Releases; `status` va en `state.update`; acciones `checkUpdate` e `installUpdate`), `consumeShowMark` |
-| `main.js` | `createWindow`, `createOverlay` (transparente, sin clics), `updateOverlay`, `createTray`, `cleanConfig` (valida los parches de configuración), `setupIpc`, `start` |
+| `main.js` | `createWindow`, `createOverlay` (transparente, sin clics), `updateOverlay`, `captureScoreboard` (captura del Tab, una por partida, en `cache\tab-capture.png`), `createTray`, `cleanConfig` (valida los parches de configuración), `setupIpc`, `start` |
 | `preload.js` | `window.api`: `init`, `on`, `setConfig`, `setSecret`, `action`, `window` |
 | `companion.js` | `Companion`: `tick` (283), `onPhaseChange`, `onConnected`, `syncCampTimers` (timers nativos), `csTarget`, `refreshLobby` (invitaciones, cola, posiciones), `queueList` (colas disponibles), `refreshRecs`, `refreshCounterBans`, `action` (367), `setSecret`, `state`/`snapshot` |
 | `lcu.js` | `findAuth` (línea de comandos de LeagueClientUx o lockfile), `Lcu.request(method, path, body)` |

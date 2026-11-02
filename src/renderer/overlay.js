@@ -18,12 +18,14 @@ const SKILL_BAR = { MIN: 0.6585, Q_X: -202.1, GAP: 66.45, TOP_Y: 178.5 };
 const SKILL_INDEX = { Q: 0, W: 1, E: 2, R: 3 };
 
 // Marcador del juego (Tab), centrado en pantalla: tu equipo en una mitad y los rivales en la otra,
-// una fila por jugador en el orden de las lineas. Valores a 1080 de alto y escala de HUD 1, con la
-// misma unidad que SKILL_BAR. ESTIMADOS (sin medir en una captura): se ajustan en Ajustes con
-// overlay.scoutX / scoutY / scoutRow (px)
-//   borde exterior de cada mitad = centro +- HALF_W * unidad; fila i centrada en
+// una fila por jugador en el orden de las lineas. Con el marcador espejado los objetos van en el
+// borde exterior, asi que las etiquetas van FUERA del cuadro, pegadas a su margen (diseno aprobado
+// el 02/11). Valores a 1080 de alto y escala de HUD 1, con la misma unidad que SKILL_BAR.
+// ESTIMADOS (sin medir en una captura): se ajustan en Ajustes con overlay.scoutX / scoutY / scoutRow (px)
+//   borde exterior del cuadro = centro +- HALF_W * unidad (+ GAP); fila i centrada en
 //   alto/2 + (ROW0_Y + i * ROW_H) * unidad
-const SCOREBOARD = { HALF_W: 500, ROW0_Y: -150, ROW_H: 68 };
+// v1.2.7 tenia HALF_W 500: con GlobalScale 0,42 a 2560x1440 quedaban dentro, encima de los objetos
+const SCOREBOARD = { HALF_W: 740, GAP: 6, ROW0_Y: -150, ROW_H: 68 };
 const SCOUT_POS = { TOP: 'top', JUNGLE: 'jungla', MIDDLE: 'mid', BOTTOM: 'ADC', UTILITY: 'support' };
 // Colores de los grupos de premades (1, 2) por equipo
 const GROUP_COLORS = { ally: ['#C8AA6E', '#7FC8F0'], enemy: ['#B48CF0', '#F08CB4'] };
@@ -125,7 +127,7 @@ const Overlay = {
     const s = Math.min(1, Math.max(0, Number(this.live.hudScale ?? 1)));
     const u = window.innerHeight / 1080 * (SKILL_BAR.MIN + (1 - SKILL_BAR.MIN) * s);
     const cx = window.innerWidth / 2;
-    const edge = SCOREBOARD.HALF_W * u + (Number(o.scoutX) || 0);
+    const edge = (SCOREBOARD.HALF_W + SCOREBOARD.GAP) * u + (Number(o.scoutX) || 0);
     const rowH = SCOREBOARD.ROW_H * u + (Number(o.scoutRow) || 0);
     const y0 = window.innerHeight / 2 + SCOREBOARD.ROW0_Y * u + (Number(o.scoutY) || 0);
     // Tu equipo a la izquierda salvo que se intercambien los lados en Ajustes

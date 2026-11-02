@@ -1,6 +1,6 @@
 // LoL Coach: ventanas (principal y overlay), icono de la bandeja y comunicacion con la interfaz.
 // --hidden: arranca oculto en la bandeja y muestra la ventana cuando se abre el cliente.
-const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, nativeTheme, screen, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, nativeTheme, screen, shell, desktopCapturer } = require('electron');
 const path = require('path');
 const { Config } = require('./config');
 const { Companion } = require('./companion');
@@ -103,6 +103,28 @@ function updateOverlay(live) {
   // La tecla Tab solo se mira con el overlay a la vista y el oro por linea o las etiquetas activados
   const o = config.get().overlay;
   if (want && (o.goldDiff !== false || o.scoutTab !== false)) tab.start(); else tab.stop();
+}
+
+// Captura del marcador (Tab) para medir su geometria: una por partida, en cache\tab-capture.png.
+// El overlay no sale (setContentProtection), solo el juego
+let captured = false;   // se reinicia al acabar la partida
+async function captureScoreboard(dir) {
+  if (captured) return;
+  captured = true;
+  await new Promise(r => setTimeout(r, 400));   // que el marcador termine de abrirse
+  try {
+    const { size, scaleFactor } = screen.getPrimaryDisplay();
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'], thumbnailSize: { width: Math.round(size.width * scaleFactor), height: Math.round(size.height * scaleFactor) },
+    });
+    const src = sources.find(s => s.display_id === String(screen.getPrimaryDisplay().id)) || sources[0];
+    if (!src) return;
+    const file = path.join(dir, 'cache', 'tab-capture.png');
+    require('fs').writeFileSync(file, src.thumbnail.toPNG());
+    log(`overlay: captura del marcador en ${file}`);
+  } catch (e) {
+    log(`overlay: no se pudo capturar el marcador: ${e.message}`);
+  }
 }
 
 function createTray(icon) {
@@ -211,8 +233,11 @@ async function start() {
   setupIpc();
 
   for (const channel of CHANNELS) companion.on(channel, data => send(channel, data));
-  companion.on('live', live => { if (!overlayTest) updateOverlay(live); });
-  tab.on('change', down => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('tab', down); });
+  companion.on('live', live => { if (!live?.active) captured = false; if (!overlayTest) updateOverlay(live); });
+  tab.on('change', down => {
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('tab', down);
+    if (down && companion.live.state?.active && !overlayTest) captureScoreboard(dir);
+  });
   companion.on('accepted', () => shell.beep());
   // El cliente se abre: mostramos la ventana junto a el (sin quitarle el foco); se cierra: a la bandeja
   companion.on('client-opened', () => { if (!win.isVisible()) showWindow(false); });
