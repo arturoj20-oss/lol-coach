@@ -17,7 +17,7 @@ y los datos públicos de OP.GG y Data Dragon. No lee la memoria del juego ni mue
 
 ## Uso
 
-- Descarga: el instalador está en [Releases](https://github.com/Artiloked/lol-coach/releases/latest). Cada uno pone sus propias claves (Riot y, si quiere, Anthropic) en Ajustes.
+- Descarga: el instalador está en [Releases](https://github.com/arturoj20-oss/lol-coach/releases/latest). Cada uno pone sus propias claves (Riot y, si quiere, Anthropic) en Ajustes.
 - Desarrollo: `npm start` (o doble clic en `Iniciar.bat`).
 - Instalador local: `npm run dist` → `dist\LoL Coach Setup <versión>.exe` (no publica nada).
 - El overlay necesita el juego en modo **sin bordes** o **ventana**.

@@ -1,7 +1,7 @@
 {
   "name": "lol-coach",
   "productName": "LoL Coach",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "private": true,
   "description": "Asistente personal para League of Legends: seleccion de campeones, overlay de partida y analisis post-partida",
   "author": "Artiloked",
@@ -31,7 +31,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "Artiloked",
+        "owner": "arturoj20-oss",
         "repo": "lol-coach",
         "releaseType": "release"
       }
