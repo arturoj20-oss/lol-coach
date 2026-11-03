@@ -21,11 +21,12 @@ const SKILL_INDEX = { Q: 0, W: 1, E: 2, R: 3 };
 // una fila por jugador en el orden de las lineas. Con el marcador espejado los objetos van en el
 // borde exterior, asi que las etiquetas van FUERA del cuadro, pegadas a su margen (diseno aprobado
 // el 02/11). Valores a 1080 de alto y escala de HUD 1, con la misma unidad que SKILL_BAR.
-// ESTIMADOS (sin medir en una captura): se ajustan en Ajustes con overlay.scoutX / scoutY / scoutRow (px)
+// MEDIDOS el 03/11 en una captura (2560x1440, GlobalScale 0,42, unidad 1,069 px): borde exterior en
+// x 508/2048, filas de y 411 a 921 (102 px). Ajuste fino en Ajustes: overlay.scoutX / scoutY / scoutRow (px)
 //   borde exterior del cuadro = centro +- HALF_W * unidad (+ GAP); fila i centrada en
 //   alto/2 + (ROW0_Y + i * ROW_H) * unidad
-// v1.2.7 tenia HALF_W 500: con GlobalScale 0,42 a 2560x1440 quedaban dentro, encima de los objetos
-const SCOREBOARD = { HALF_W: 740, GAP: 6, ROW0_Y: -150, ROW_H: 68 };
+// Antes (estimado): HALF_W 740, ROW0_Y -150, ROW_H 68: filas demasiado abajo y juntas
+const SCOREBOARD = { HALF_W: 720, GAP: 6, ROW0_Y: -241.3, ROW_H: 95.4 };
 const SCOUT_POS = { TOP: 'top', JUNGLE: 'jungla', MIDDLE: 'mid', BOTTOM: 'ADC', UTILITY: 'support' };
 // Colores de los grupos de premades (1, 2) por equipo
 const GROUP_COLORS = { ally: ['#C8AA6E', '#7FC8F0'], enemy: ['#B48CF0', '#F08CB4'] };

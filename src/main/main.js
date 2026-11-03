@@ -6,7 +6,7 @@ const { Config } = require('./config');
 const { Companion } = require('./companion');
 const { initLog, log } = require('./log');
 const { initOpgg } = require('./opgg');
-const { TabWatcher } = require('./keys');
+const { TabWatcher, gameFocused } = require('./keys');
 const { initUpdater, consumeShowMark } = require('./updater');
 
 const RENDERER = path.join(__dirname, '..', 'renderer');
@@ -236,7 +236,7 @@ async function start() {
   companion.on('live', live => { if (!live?.active) captured = false; if (!overlayTest) updateOverlay(live); });
   tab.on('change', down => {
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('tab', down);
-    if (down && companion.live.state?.active && !overlayTest) captureScoreboard(dir);
+    if (down && companion.live.state?.active && !overlayTest && gameFocused()) captureScoreboard(dir);
   });
   companion.on('accepted', () => shell.beep());
   // El cliente se abre: mostramos la ventana junto a el (sin quitarle el foco); se cierra: a la bandeja

@@ -7,11 +7,24 @@ const { log } = require('./log');
 const VK_TAB = 0x09;
 
 let getKey = null;
+let getTitle = null;
+
+// La ventana del juego esta en primer plano (sin koffi no se sabe: false)
+function gameFocused() {
+  try { return !!getTitle && getTitle().startsWith('League of Legends (TM)'); } catch { return false; }
+}
 try {
   const koffi = require('koffi');
   const user32 = koffi.load('user32.dll');
   const GetAsyncKeyState = user32.func('short __stdcall GetAsyncKeyState(int vKey)');
   getKey = vk => (GetAsyncKeyState(vk) & 0x8000) !== 0;
+  const GetForegroundWindow = user32.func('void * __stdcall GetForegroundWindow()');
+  const GetWindowTextW = user32.func('int __stdcall GetWindowTextW(void *hWnd, _Out_ uint16_t *text, int max)');
+  getTitle = () => {
+    const buf = new Uint16Array(256);
+    const n = GetWindowTextW(GetForegroundWindow(), buf, 256);
+    return String.fromCharCode(...buf.subarray(0, Math.max(0, n)));
+  };
 } catch (e) {
   log(`tecla Tab: koffi no disponible (${e.message})`);
 }
@@ -44,4 +57,4 @@ class TabWatcher extends EventEmitter {
   }
 }
 
-module.exports = { TabWatcher };
+module.exports = { TabWatcher, gameFocused };

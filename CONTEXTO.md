@@ -1,6 +1,6 @@
 # LoL Coach: contexto (versión corta)
 
-Actualizado: 01/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
+Actualizado: 03/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
 
 ## Usuario y entorno
 - Uso **personal**. Cuenta Artiloked#EUW, Esmeralda, jungla (Shaco, Shyvana). Responder en **español de España**. Comentarios del código en español, breves y sin acentos en `src/main`.
@@ -125,6 +125,7 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
   - Falta: una captura del Tab del usuario para fijar la geometría (y ver si su equipo sale siempre a la izquierda).
   - 02/11, el usuario lo probó en partida: las etiquetas salen **demasiado al centro y tapan los objetos** de cada campeón, y los premades fallaban. Arreglado (sin probar): las partidas compartidas solo cuentan si iban **en el mismo equipo** (se descargan hasta 4 por pareja; se registran los grupos en `log.txt`). Tab se vigila también con el oro por línea desactivado. La geometría sigue pendiente de la captura. **Publicado en la v1.2.7** (02/11).
   - 02/11, v1.2.8: diseño aprobado de las etiquetas **fuera del cuadro del Tab, pegadas a su margen** (demo: https://claude.ai/artifact/PShUVo4M3RaffpDTvRNEtx). El usuario tiene `MirroredScoreboard=1` (objetos en el borde exterior), `GlobalScale=0.42` y 2560×1440. `SCOREBOARD.HALF_W` pasa de 500 a 740 (estimado) más `GAP` de 6. La app guarda una captura del marcador la primera vez que se pulsa Tab en cada partida (`cache\tab-capture.png`, `captureScoreboard` en `main.js`, sin el overlay): con ella medir el borde real y la altura de las filas.
+  - 03/11: la captura de la app no servía (salía el escritorio: capturaba aunque el juego no estuviera en primer plano). Ahora solo captura con el juego delante (`gameFocused` en `keys.js`). **Geometría medida** con una captura en práctica (2560×1440, GlobalScale 0,42): `SCOREBOARD` = `HALF_W` 720, `ROW0_Y` −241,3, `ROW_H` 95,4 (antes las filas iban demasiado abajo y juntas). Sin publicar; falta verlo en partida y comprobar si el marcador escala igual con otro `GlobalScale`.
 - Visto en el registro del 01/11 (15:12:48-54, Nami): las runas y el set se reimportaron cada segundo, alternando dos builds. Falta saber si fueron clics del usuario o un bucle.
 - Falta probar en real: el overlay en partida, el scouting, el post-partida automático, el coach de IA en la selección y la vista Historial.
 - `objectives.js`: falta confirmar cuándo se retira el Heraldo. Ahora se supone que se va cuando sale el Barón, a los 20:00.

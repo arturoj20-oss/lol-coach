@@ -43,7 +43,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `champions.js` | `Champions`: `get`, `name`, `find`, `idFromEnglish`, `idFromKey`, `load(lcu)` |
 | `live.js` | `LiveGame`: `poll`, `compute` (129, todo el cálculo de partida), `nextSkill`, `readHudScale` |
 | `objectives.js` | `DEFAULT_TIMES`, `NOTIFY_BEFORE`, `NOTIFY_KEYS`, `LANES` |
-| `keys.js` | `TabWatcher` (koffi + `GetAsyncKeyState`) |
+| `keys.js` | `TabWatcher` (koffi + `GetAsyncKeyState`), `gameFocused` (ventana del juego en primer plano) |
 | `scouting.js` | `Scouting.start(puuid)`: espectador, liga, maestría, posiciones recientes (`recentPositions`, OP.GG) y premades (`markPremades`, async: comprueba en `riot.match` que iban en el mismo equipo); `sampleScouting` para «Probar overlay» |
 | `profile.js` | `Profile`: `doRefresh`, `apiPuuid`, `estimateLp` (curva estimada), `recordLp`, `afterGame`, `analyze(matchId)` (302), `tips`; suelta: `summarize` |
 | `riot.js` | `RiotApi` con limitador y caché: `account`, `summoner`, `league`, `matchIds`, `match`, `timeline`, `mastery`, `activeGame`; de otras regiones: `apexLeague`, `topMasteriesOn`, `matchIdsOn`, `matchIdsSince`, `matchOn`, `accountByRiotId`, `accountByPuuid`; `recentCount` |
@@ -66,7 +66,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `views/patch.js` | Notas del parche: filtros, veredictos y «Tus campeones» |
 | `views/settings.js` | Ajustes |
 | `theme.css`, `app.css`, `views/*.css` | Estilos: tokens en `theme.css` y uno por vista |
-| `overlay.html/.js/.css` | Overlay: `SKILL_BAR` (calibrado), avisos, franja de Tab (`renderTab`) y etiquetas del marcador (`renderScout`, `scoutInfo`, `SCOREBOARD` estimado) |
+| `overlay.html/.js/.css` | Overlay: `SKILL_BAR` (calibrado), avisos, franja de Tab (`renderTab`) y etiquetas del marcador (`renderScout`, `scoutInfo`, `SCOREBOARD` medido el 03/11) |
 | `mock-api.js` | Datos de ejemplo sin Electron; F9 abre el simulador de fases |
 
 ## Otros
