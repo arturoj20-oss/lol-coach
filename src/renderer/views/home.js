@@ -1,9 +1,21 @@
 // Vista Inicio: perfil, rango, grafica de LP, resumen reciente, campeones y estado del cliente
 'use strict';
 
+// Periodos de la grafica de LP
+const LP_RANGES = {
+  week: { name: 'Semana', label: 'en la última semana', days: 7 },
+  month: { name: 'Mes', label: 'en el último mes', days: 30 },
+  year: { name: 'Año', label: 'en el último año', days: 365 },
+};
+// Rangos en la escala de valores de profile.lpValue (400 por rango; Maestro+ desde 2800)
+const TIER_KEYS = ['iron', 'bronze', 'silver', 'gold', 'platinum', 'emerald', 'diamond', 'master'];
+const TIER_BANDS = TIER_KEYS.map((k, i) => ({ from: i * 400, cls: `tier-${k}` }));
+const tierClass = v => `tier-${TIER_KEYS[Math.min(7, Math.max(0, Math.floor(v / 400)))]}`;
+
 App.register('home', {
   channels: ['state', 'config', 'profile', 'champions', 'recs'],
   lpQueue: 'RANKED_SOLO_5x5',
+  lpRange: 'month',
 
   mount(el) {
     this.el = el;
@@ -27,6 +39,7 @@ App.register('home', {
       if (a.dataset.act === 'settings') App.go('settings');
       if (a.dataset.act === 'refresh') window.api.action('refreshProfile').catch(err => App.toast(err.message, 'error'));
       if (a.dataset.act === 'queue') { this.lpQueue = a.dataset.q; this.renderLp(); }
+      if (a.dataset.act === 'lpRange') { this.lpRange = a.dataset.r; this.renderLp(); }
       if (a.dataset.act === 'sort') { this.champSort = a.dataset.k; this.renderChamps(); }
       if (a.dataset.act === 'match') { App.go('history'); App.views.history?.openMatch?.(a.dataset.id); }
       if (a.dataset.act === 'counterBan') {
@@ -268,14 +281,25 @@ App.register('home', {
     const { profile } = App.data;
     const box = $('#homeLp');
     const head = html`<div class="card-head"><h2>Evolución de LP</h2><span class="spacer"></span>
+      <div class="seg" role="group" aria-label="Periodo">
+        ${Object.entries(LP_RANGES).map(([k, r]) => html`<button class="${this.lpRange === k ? 'on' : ''}" data-act="lpRange" data-r="${k}">${r.name}</button>`)}
+      </div>
       <div class="seg" role="group" aria-label="Cola">
         <button class="${this.lpQueue === 'RANKED_SOLO_5x5' ? 'on' : ''}" data-act="queue" data-q="RANKED_SOLO_5x5">Solo/Dúo</button>
         <button class="${this.lpQueue === 'RANKED_FLEX_SR' ? 'on' : ''}" data-act="queue" data-q="RANKED_FLEX_SR">Flexible</button>
       </div></div>`;
     if (this.needsKey()) return setHtml(box, html`${head}<div class="chart-empty">${emptyState({ glyph: 'key', title: 'Gráfica no disponible', text: 'Necesita la clave de Riot.', action: html`<button class="btn small" data-act="settings">Ir a Ajustes</button>` })}</div>`);
     if (profile?.loading && !profile.lpHistory) return setHtml(box, html`${head}<div class="chart-box skel"></div>`);
-    const pts = (profile?.lpHistory || []).filter(p => p.queue === this.lpQueue);
-    if (pts.length < 2) return setHtml(box, html`${head}<div class="chart-empty">${emptyState({ glyph: 'crown', title: 'Aún sin datos', text: 'La gráfica aparecerá cuando juegues algunas clasificatorias en esta cola.' })}</div>`);
+    const all = (profile?.lpHistory || []).filter(p => p.queue === this.lpQueue);
+    if (all.length < 2) return setHtml(box, html`${head}<div class="chart-empty">${emptyState({ glyph: 'crown', title: 'Aún sin datos', text: 'La gráfica aparecerá cuando juegues algunas clasificatorias en esta cola.' })}</div>`);
+    // Periodo: los puntos dentro y, como punto de partida, el ultimo de antes (el rango con el que empezaste)
+    const range = LP_RANGES[this.lpRange];
+    const since = Date.now() - range.days * 864e5;
+    const inside = all.filter(p => p.t >= since);
+    const before = [...all].reverse().find(p => p.t < since);
+    const pts = before ? [before, ...inside] : inside;
+    const games = before ? inside.length : inside.length - 1;
+    if (!inside.length || pts.length < 2) return setHtml(box, html`${head}<div class="chart-empty">${emptyState({ glyph: 'crown', title: `Sin partidas ${range.label}`, text: 'Prueba con un periodo más largo.' })}</div>`);
     const first = pts[0].value, last = pts[pts.length - 1].value;
     const delta = last - first;
     // Lineas de division deducidas de los propios puntos (value - LP = inicio de la division)
@@ -291,11 +315,11 @@ App.register('home', {
     const estimated = pts.some(p => p.estimated);
     setHtml(box, html`${head}
       <div class="lp-summary"><span class="lp-now">${now ? now.name : pts[pts.length - 1].label}</span>${now ? html`<span class="lp-lp num">${now.lp} LP</span>` : ''}
-        <span class="tag ${delta >= 0 ? 'green' : 'red'} num" data-tip="Cambio en las últimas ${pts.length - 1} partidas">${fmt.signed(delta)} LP</span>
-        <span class="muted">${pts.length - 1} partidas</span>
+        <span class="tag ${delta >= 0 ? 'green' : 'red'} num" data-tip="Cambio ${range.label}">${fmt.signed(delta)} LP</span>
+        <span class="muted">${games} ${games === 1 ? 'partida' : 'partidas'}</span>
         ${estimated ? html`<span class="tag" data-tip="Calculado a partir de tus victorias y derrotas, no de los LP reales">Estimado</span>` : ''}</div>
       <div class="chart-box" id="lpChart"></div>`);
-    lineChart($('#lpChart'), pts.map(p => ({ y: p.value, xLabel: fmt.date(p.t), title: nice(p) + (p.estimated ? ' (estimado)' : ''), text: fmt.dateTime(p.t) })), { grid, padLeft: 64 });
+    lineChart($('#lpChart'), pts.map(p => ({ y: p.value, cls: tierClass(p.value), xLabel: fmt.date(p.t), title: nice(p) + (p.estimated ? ' (estimado)' : ''), text: fmt.dateTime(p.t) })), { grid, padLeft: 64, bands: TIER_BANDS });
   },
 
   renderRecent() {

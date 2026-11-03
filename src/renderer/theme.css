@@ -48,6 +48,9 @@
   --loss-soft: rgba(242, 90, 110, .14);
   --warn-soft: rgba(240, 170, 74, .14);
   --ok-soft: rgba(63, 207, 126, .14);
+  /* --- Rangos (grafica de LP) --- */
+  --tier-iron: #9A8C84; --tier-bronze: #C2825A; --tier-silver: #A9B6C2; --tier-gold: #E3B54F;
+  --tier-platinum: #3CC7B4; --tier-emerald: #2FC77A; --tier-diamond: #7B97F5; --tier-master: #C07BF0;
   --loss-text: #FF8E9D;
   --ok-text: #7FE3AA;
   --warn-text: #F6C47E;
@@ -182,6 +185,9 @@
   --glow-blue: 0 0 0 3px rgba(10, 143, 132, .18);
 
   color-scheme: light;
+  /* --- Rangos (grafica de LP), mas oscuros para fondo claro --- */
+  --tier-iron: #6E625B; --tier-bronze: #9A5F3A; --tier-silver: #6C7A88; --tier-gold: #A77A14;
+  --tier-platinum: #1A8C7D; --tier-emerald: #188A50; --tier-diamond: #4363C9; --tier-master: #8A3FC0;
 }
 
 * { box-sizing: border-box; }

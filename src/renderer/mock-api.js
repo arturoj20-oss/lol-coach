@@ -299,6 +299,13 @@
     for (const m of soloMatches) { v -= m.win ? 21 : -19; vals.push(v); }
     vals.reverse();
     const times = [NOW - 120 * 3600 * 1000, ...soloMatches.map(m => m.endedAt).reverse()];
+    // Historia de un año (de Oro a Esmeralda) para probar los periodos y los colores por rango
+    const oldest = rankValue('GOLD', 'II', 20);
+    for (let i = 0; i < 60; i++) {
+      const val = Math.round(oldest + (vals[0] - oldest) * i / 60 + Math.sin(i * 1.7) * 45);
+      const rk = valueToRank(val);
+      lp.push({ t: times[0] - (60 - i) * 6 * 864e5, queue: 'RANKED_SOLO_5x5', value: val, label: `${rk.tier} ${rk.division} ${rk.lp} LP`, estimated: true });
+    }
     vals.forEach((val, i) => { const rk = valueToRank(val); lp.push({ t: times[i], queue: 'RANKED_SOLO_5x5', value: val, label: `${rk.tier} ${rk.division} ${rk.lp} LP` }); });
     let f = rankValue('PLATINUM', 'I', 40);
     [1, 1, 0, 1].forEach((w, i) => { const rk = valueToRank(f); lp.push({ t: NOW - (100 - i * 20) * 3600 * 1000, queue: 'RANKED_FLEX_SR', value: f, label: `${rk.tier} ${rk.division} ${rk.lp} LP` }); f += w ? 22 : -18; });

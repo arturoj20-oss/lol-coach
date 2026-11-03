@@ -45,7 +45,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `objectives.js` | `DEFAULT_TIMES`, `NOTIFY_BEFORE`, `NOTIFY_KEYS`, `LANES` |
 | `keys.js` | `TabWatcher` (koffi + `GetAsyncKeyState`), `gameFocused` (ventana del juego en primer plano) |
 | `scouting.js` | `Scouting.start(puuid)`: espectador, liga, maestría, posiciones recientes (`recentPositions`, OP.GG) y premades (`markPremades`, async: comprueba en `riot.match` que iban en el mismo equipo); `sampleScouting` para «Probar overlay» |
-| `profile.js` | `Profile`: `doRefresh`, `apiPuuid`, `estimateLp` (curva estimada), `recordLp`, `afterGame`, `analyze(matchId)` (302), `tips`; suelta: `summarize` |
+| `profile.js` | `Profile`: `doRefresh`, `apiPuuid`, `estimateLp` (curva estimada), `recordLp` (con `account`), `lpOf` (historial de una cuenta), `afterGame`, `analyze(matchId)` (302), `tips`; suelta: `summarize` |
 | `riot.js` | `RiotApi` con limitador y caché: `account`, `summoner`, `league`, `matchIds`, `match`, `timeline`, `mastery`, `activeGame`; de otras regiones: `apexLeague`, `topMasteriesOn`, `matchIdsOn`, `matchIdsSince`, `matchOn`, `accountByRiotId`, `accountByPuuid`; `recentCount` |
 | `otp.js` | `OtpBuilds` = mains (segundo plano; datos de la app en `data/mains/*.json.gz` + del equipo en `cache/mains/*.json`: `load`, `merge`, `save` solo de `changed`, `exportOf`, `keyPuuid` para puuids de otra clave): `step` (por campeón en `order()`: `discover` con el leaderboard de OP.GG → `vet` del candidato → `fetchBatch` de su season → `refresh` cada 3 días), `matchup(championId, role, vsId)` (mains contra un rival en la season; lo usa `matchup.js`), `isReady`, `migrate`, `options(championId, role, items)` (con `otp.names` y `otp.matches`; en la interfaz: `otpByline` y `otpMatches`), `summary(championId, role)` (aviso en la interfaz: `otpNote` en `views/select.js`); lo usan `draft.loadBuild` y `champstats.get`; sueltas: `summarize` (partida → resumen), `buildOf` |
 | `coach.js` | `Coach.run`, `analyze` (post-partida), `draftAdvice` (selección) |
@@ -59,8 +59,8 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 |---|---|
 | `index.html`, `app.js` | `App`: navegación, cambio automático de vista según la fase (`PHASE_NAMES`) y barra de actualización (`paintUpdate`) |
 | `util.js` | `html` (plantilla con escape), `setHtml` (no toca el DOM si no hay cambios), `hydrate` (`data-vars`), `fmt`, `Dd`, `icon`, `objIcon`, nombres de rangos y roles |
-| `ui.js` | `Tip`, `Theme`, `Seg`, `Expand`, `ChampPicker`, gráficas SVG (`lineChart`, `diffChart`, `ring`, `deathMap`, `compareBar`) y estados vacío y cargando |
-| `views/home.js` | Inicio: perfil, LP y Cliente (invitaciones, elegir cola y posiciones en `lobbyBlock`, buscar, «Próxima selección») |
+| `ui.js` | `Tip`, `Theme`, `Seg`, `Expand`, `ChampPicker`, gráficas SVG (`lineChart`, con `bands` para colorear por rango; `diffChart`, `ring`, `deathMap`, `compareBar`) y estados vacío y cargando |
+| `views/home.js` | Inicio: perfil, LP (`renderLp`, periodos `LP_RANGES`, colores `TIER_BANDS`) y Cliente (invitaciones, elegir cola y posiciones en `lobbyBlock`, buscar, «Próxima selección») |
 | `views/select.js` | Campeones: Mi selección y el explorador; `champButtons` (Fijar/Bloquear), `buildPanel` (maestro-detalle de builds), `runesView`, `skillsView`, `itemLayout`, `contextBlock` |
 | `views/history.js` | Historial y análisis post-partida con el coach (`miniMarkdown`) |
 | `views/patch.js` | Notas del parche: filtros, veredictos y «Tus campeones» |

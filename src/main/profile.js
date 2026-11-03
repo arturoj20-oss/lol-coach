@@ -73,7 +73,7 @@ class Profile extends EventEmitter {
     this.riot = riot;
     this.lpFile = path.join(dir, 'lp-history.json');
     this.identity = null;    // { puuid, gameName, tagLine, profileIconId, level }
-    this.state = { loading: false, error: null, updatedAt: null, summoner: null, ranked: [], lpHistory: this.loadLp(), recent: null, champions: [], roles: [], matches: [] };
+    this.state = { loading: false, error: null, updatedAt: null, summoner: null, ranked: [], lpHistory: this.lpOf(), recent: null, champions: [], roles: [], matches: [] };
     this.postgame = { loading: false, error: null, analysis: null };
     this.refreshing = null;
   }
@@ -82,8 +82,16 @@ class Profile extends EventEmitter {
     try { return JSON.parse(fs.readFileSync(this.lpFile, 'utf8')); } catch { return []; }
   }
 
+  // Historial de una cuenta (account = puuid de la API). Los puntos antiguos sin cuenta valen para
+  // cualquiera. Sin puuid (al arrancar), la ultima cuenta guardada
+  lpOf(puuid) {
+    const all = this.loadLp();
+    const acc = puuid || [...all].reverse().find(h => h.account)?.account;
+    return all.filter(h => !h.account || !acc || h.account === acc);
+  }
+
   setIdentity(identity) {
-    if (this.identity?.puuid !== identity.puuid) this.apiPuuidCache = null;
+    if (this.identity?.puuid !== identity.puuid) { this.apiPuuidCache = null; this.lpEstimated = null; }
     this.identity = identity;
   }
 
@@ -126,7 +134,7 @@ class Profile extends EventEmitter {
       const ranked = (entries || [])
         .filter(e => e.queueType === 'RANKED_SOLO_5x5' || e.queueType === 'RANKED_FLEX_SR')
         .map(e => ({ queue: e.queueType, tier: e.tier, division: e.rank, lp: e.leaguePoints, wins: e.wins, losses: e.losses, hotStreak: e.hotStreak }));
-      this.recordLp(entries || []);
+      this.recordLp(entries || [], puuid);
 
       const matches = [];
       for (const id of ids || []) {
@@ -141,13 +149,13 @@ class Profile extends EventEmitter {
       this.state = {
         loading: false, error: null, updatedAt: Date.now(),
         summoner: { gameName: this.identity.gameName, tagLine: this.identity.tagLine, level: this.identity.level, profileIconId: this.identity.profileIconId },
-        ranked, lpHistory: this.mergeLp(this.loadLp(), this.lpEstimated), matches,
+        ranked, lpHistory: this.mergeLp(this.lpOf(puuid), this.lpEstimated), matches,
         ...Profile.aggregate(matches),
       };
       this.emitState();
       // La curva estimada descarga mas partidas: va despues, sin bloquear el resto del perfil
       this.lpEstimated = await this.estimateLp(puuid, entries || []);
-      this.state = { ...this.state, lpHistory: this.mergeLp(this.loadLp(), this.lpEstimated) };
+      this.state = { ...this.state, lpHistory: this.mergeLp(this.lpOf(puuid), this.lpEstimated) };
     } catch (e) {
       this.state = { ...this.state, loading: false, error: e.message };
     }
@@ -158,7 +166,7 @@ class Profile extends EventEmitter {
   // resta una cantidad media de LP, calibrada con puntos reales anteriores (OP.GG o guardados)
   // cuando los hay. Los puntos llevan estimated: true.
   async estimateLp(puuid, entries) {
-    const saved = this.loadLp();
+    const saved = this.lpOf(puuid);
     let opggPoints = [];
     try {
       const { gameName, tagLine, region } = this.identity;
@@ -228,15 +236,17 @@ class Profile extends EventEmitter {
     return [...est, ...saved.map(h => ({ ...h, estimated: false }))].sort((a, b) => a.t - b.t);
   }
 
-  recordLp(entries) {
+  // Un punto por cola cuando cambian los LP, marcado con la cuenta (con otra cuenta en el cliente
+  // no se mezcla con la tuya)
+  recordLp(entries, puuid) {
     const history = this.loadLp();
     let changed = false;
     for (const e of entries) {
       if (e.queueType !== 'RANKED_SOLO_5x5' && e.queueType !== 'RANKED_FLEX_SR') continue;
       const value = lpValue(e);
-      const last = [...history].reverse().find(h => h.queue === e.queueType);
+      const last = [...history].reverse().find(h => h.queue === e.queueType && (!h.account || h.account === puuid));
       if (last && last.value === value) continue;
-      history.push({ t: Date.now(), queue: e.queueType, value, label: `${e.tier} ${TIERS.indexOf(e.tier) >= 7 ? '' : e.rank + ' '}${e.leaguePoints} LP` });
+      history.push({ t: Date.now(), account: puuid, queue: e.queueType, value, label: `${e.tier} ${TIERS.indexOf(e.tier) >= 7 ? '' : e.rank + ' '}${e.leaguePoints} LP` });
       changed = true;
     }
     if (changed) try { fs.writeFileSync(this.lpFile, JSON.stringify(history.slice(-500))); } catch { }

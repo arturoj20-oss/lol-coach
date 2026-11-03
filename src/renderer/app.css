@@ -160,6 +160,20 @@ body {
 .chart .fill-stop { stop-color: var(--accent); }
 .chart .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 1.5; }
 .chart .dot.last { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+/* Color por rango (grafica de LP): tramos de la linea y puntos */
+.chart .tier-iron { stop-color: var(--tier-iron); stroke: var(--tier-iron); }
+.chart .tier-bronze { stop-color: var(--tier-bronze); stroke: var(--tier-bronze); }
+.chart .tier-silver { stop-color: var(--tier-silver); stroke: var(--tier-silver); }
+.chart .tier-gold { stop-color: var(--tier-gold); stroke: var(--tier-gold); }
+.chart .tier-platinum { stop-color: var(--tier-platinum); stroke: var(--tier-platinum); }
+.chart .tier-emerald { stop-color: var(--tier-emerald); stroke: var(--tier-emerald); }
+.chart .tier-diamond { stop-color: var(--tier-diamond); stroke: var(--tier-diamond); }
+.chart .tier-master { stop-color: var(--tier-master); stroke: var(--tier-master); }
+.chart .dot.last[class*="tier-"] { stroke: var(--surface); }
+.chart .dot.last.tier-iron { fill: var(--tier-iron); } .chart .dot.last.tier-bronze { fill: var(--tier-bronze); }
+.chart .dot.last.tier-silver { fill: var(--tier-silver); } .chart .dot.last.tier-gold { fill: var(--tier-gold); }
+.chart .dot.last.tier-platinum { fill: var(--tier-platinum); } .chart .dot.last.tier-emerald { fill: var(--tier-emerald); }
+.chart .dot.last.tier-diamond { fill: var(--tier-diamond); } .chart .dot.last.tier-master { fill: var(--tier-master); }
 .chart .guide { stroke: var(--text-hi); stroke-dasharray: 3 3; opacity: 0; transition: opacity var(--dur-fast); }
 .chart:hover .guide { opacity: .5; }
 .chart .hit { fill: transparent; cursor: crosshair; }

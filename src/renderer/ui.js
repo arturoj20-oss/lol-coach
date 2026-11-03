@@ -347,10 +347,34 @@ function lineChart(el, points, opts = {}) {
     });
     const line = points.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(p.y).toFixed(1)}`).join('');
     const area = `${line}L${X(n - 1)},${H - pad.b}L${X(0)},${H - pad.b}Z`;
-    const dots = points.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.y)}" r="${i === n - 1 ? 4 : 2.5}" class="${i === n - 1 ? 'dot last' : 'dot'}"/>`).join('');
+    const dots = points.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.y)}" r="${i === n - 1 ? 4 : 2.5}" class="${i === n - 1 ? 'dot last' : 'dot'} ${p.cls || ''}"/>`).join('');
+    const id = 'c' + Math.random().toString(36).slice(2, 8);
+    // Bandas (p. ej. rangos): la linea y el relleno cambian de color segun la altura, con cortes
+    // limpios en cada limite. bands = [{ from, cls }] (cls da stop-color en CSS)
+    let defs, lineAttr, areaFill;
+    if (opts.bands?.length) {
+      const bands = [...opts.bands].sort((a, b) => b.from - a.from);
+      const off = v => Math.min(1, Math.max(0, Y(v) / H)).toFixed(4);
+      let stops = '', top = 0;
+      for (const b of bands) {
+        const o = Math.max(top, +off(b.from));
+        stops += `<stop offset="${top}" class="${b.cls}"/><stop offset="${o}" class="${b.cls}"/>`;
+        top = o;
+        if (top >= 1) break;
+      }
+      // Lo que quede por debajo de la ultima banda, con su color
+      if (top < 1) stops += `<stop offset="${top}" class="${bands[bands.length - 1].cls}"/><stop offset="1" class="${bands[bands.length - 1].cls}"/>`;
+      defs = `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${H}">${stops}</linearGradient>`;
+      lineAttr = `class="line" stroke="url(#${id})"`;
+      areaFill = `fill="url(#${id})" fill-opacity=".12"`;
+    } else {
+      defs = `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="fill-stop" stop-opacity=".3"/><stop offset="1" class="fill-stop" stop-opacity="0"/></linearGradient>`;
+      lineAttr = 'class="line gold"';
+      areaFill = `fill="url(#${id})"`;
+    }
     el.innerHTML = `<svg width="${W}" height="${H}" class="chart">
-      <defs><linearGradient id="lpfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="fill-stop" stop-opacity=".3"/><stop offset="1" class="fill-stop" stop-opacity="0"/></linearGradient></defs>
-      ${grid}${xl}<path d="${area}" fill="url(#lpfill)"/><path d="${line}" class="line gold"/>${dots}
+      <defs>${defs}</defs>
+      ${grid}${xl}<path d="${area}" ${areaFill}/><path d="${line}" ${lineAttr}/>${dots}
       <line class="guide" y1="${pad.t}" y2="${H - pad.b}" x1="-10" x2="-10"/><rect class="hit" x="${pad.l}" y="0" width="${W - pad.l - pad.r}" height="${H}"/></svg>`;
     hoverGuide(el, n, X, i => points[i]);
   });
