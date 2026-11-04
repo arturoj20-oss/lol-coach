@@ -310,12 +310,13 @@ class Draft extends EventEmitter {
       this.loadBuild(myChampionId, role, enemyIds, buildKey);
       this.loadMatchup(myChampionId, role, enemyIds, buildKey);
     }
-    // Importar al bloquear (una vez por campeon)
+    // Importar al bloquear (una vez por campeon): hechizos y objetos. Las runas nunca se importan solas
+    // (decision del usuario): solo al pulsar una build o "Importar build", para poder jugar con las suyas
     const { autoImport } = this.config.get();
     if (locked && this.state.build?.championId === myChampionId && this.importedFor !== myChampionId &&
-        (autoImport.runes || autoImport.spells || autoImport.items)) {
+        (autoImport.spells || autoImport.items)) {
       this.importedFor = myChampionId;
-      this.importBuild({ ...autoImport, auto: true }).catch(e => log(`importar: ${e.message}`));
+      this.importBuild({ spells: autoImport.spells, items: autoImport.items, runes: false, auto: true }).catch(e => log(`importar: ${e.message}`));
     }
     this.emitState();
   }
@@ -456,14 +457,15 @@ class Draft extends EventEmitter {
     return top?.id || null;
   }
 
-  // Elegir una de las builds completas; si ya has bloqueado, se reimportan runas y objetos
+  // Elegir una de las builds completas (clic del usuario): se importan sus runas siempre y, si ya has
+  // bloqueado, tambien los objetos
   async choose(index) {
     const b = this.state.build;
     if (!b?.options?.[index]) throw new Error('Esa build no está disponible');
     this.state.choice = index;
     this.state.build = applyChoice(b, index);
     this.emitState();
-    if (this.state.locked) await this.importBuild({ runes: true, items: true });
+    await this.importBuild(this.state.locked ? { runes: true, items: true } : { runes: true });
     return true;
   }
 

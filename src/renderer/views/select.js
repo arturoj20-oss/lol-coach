@@ -712,7 +712,7 @@ App.register('select', {
     const imp = d.imported || {};
     const impChip = (k, label) => imp[k] ? html`<span class="tag ${imp[k] === 'ok' ? 'green' : 'red'}">${raw(imp[k] === 'ok' ? SVG.check : SVG.cross)}${label}</span>` : '';
     const auto = App.data.config?.autoImport || {};
-    const autoOn = auto.runes || auto.spells || auto.items;
+    const autoOn = auto.spells || auto.items;
     const n = b.options?.length || 0;
     selPaint(box, html`<div class="card-head build-head">
         ${icon('champ', b.championId, { size: 32 })}
@@ -722,7 +722,7 @@ App.register('select', {
         <button class="btn btn-primary small" data-act="import" data-tip="Importa al cliente las runas, los hechizos y los objetos de la build elegida">${raw(SVG.arrow)}Importar build</button>
       </div>
       ${imp.message || imp.runes || imp.spells || imp.items ? html`<div class="imported">${impChip('runes', 'Runas')}${impChip('spells', 'Hechizos')}${impChip('items', 'Objetos')}<span class="muted">${imp.message || ''}</span></div>` : ''}
-      ${n > 1 ? html`<p class="build-hint muted">${d.locked && autoOn ? 'Ya has bloqueado: al elegir otra build se reimportan sus runas y objetos al momento.' : autoOn ? 'Elige una build: se importará sola al bloquear el campeón.' : 'Elige una build y pulsa «Importar build».'}</p>` : ''}
+      ${n ? html`<p class="build-hint muted">${d.locked ? 'Pulsa una build para poner sus runas en tu página «LoL Coach» y sus objetos en la tienda.' : `Pulsa una build para poner sus runas en tu página «LoL Coach»${autoOn ? '; los objetos se importan al bloquear' : ''}.`} Si no pulsas nada, tus runas no se tocan.</p>` : ''}
       ${buildPanel({ options: b.options || [], chosen: d.choice ?? 0, act: 'choose', base: b, vs: b.vs, sort: this.buildSort, flags: b.enemyFlags || [], otpInfo: b.otpInfo })}`);
   },
 

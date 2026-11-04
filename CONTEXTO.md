@@ -39,6 +39,7 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
 - ❌ Usar el historial del cliente cuando no hay clave. Si se comparte la app, cada persona pone sus propias claves. La app se comparte con compañeros y cada uno tiene su propia clave personal de Riot. Los datos de mains del instalador (`data/mains`) son de la clave del usuario: se le avisó de que, estrictamente, eso queda fuera del uso personal, aunque con riesgo bajo.
 - ❌ IA en las notas del parche, para que también las lea quien no tiene Claude.
 - "Más claro" = **más fácil de leer**, no un tema blanco. Tema oscuro gris pizarra por defecto.
+- Runas **solo con un clic del usuario** (04/11): pulsar una build en Mi selección o «Importar build». Nunca al bloquear ni al revelarse enemigos, para poder jugar con sus páginas propias. Siempre en una única página «LoL Coach». Al bloquear solo se importan hechizos y objetos (`autoImport.runes` ya no se usa ni sale en Ajustes).
 - Normas de Riot:
   - sin timers de definitivas ni de Flash enemigos;
   - sin "haz X ahora" en partida;
