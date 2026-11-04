@@ -1,6 +1,6 @@
 # LoL Coach: contexto (versión corta)
 
-Actualizado: 03/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
+Actualizado: 04/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
 
 ## Usuario y entorno
 - Uso **personal**. Cuenta Artiloked#EUW, Esmeralda, jungla (Shaco, Shyvana). Responder en **español de España**. Comentarios del código en español, breves y sin acentos en `src/main`.
@@ -55,6 +55,7 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
 - Capturas de la app: `PrintWindow` sobre `MainWindowHandle`. `SendKeys` no llega a la ventana.
 - `itemLayout` está duplicado en `buildsets.js` y `views/select.js`. Si se cambia uno, hay que cambiar el otro.
 - **Orden de la tienda:** la partida lee los archivos de `Config\Global\Recommended` (y `Config\Champions\X\Recommended`) y los ordena por nombre. El cliente escribe ahí los sets de la LCU como `RIOT_ItemSet_N.json` y no toca los demás. Blitz usa `!!!blitz-N.json`, `priority: true` y `sortrank` 1e9. El orden de la lista de la LCU no cuenta.
+- La guía de OP.GG contra un rival (`matchupGuide`) trae **poca muestra** (Shaco contra Lee Sin: unas 80 partidas; núcleos de 1 o 2 partidas al 100 %). `coherentBuilds` descarta los núcleos, páginas y botas con menos de `MIN_GUIDE_GAMES` (20) y, si no queda ningún núcleo, usa el del análisis general (`general: true`; el grupo dice «análisis general (poca muestra contra X)»). En la lista, las builds con menos de 20 partidas salen con el % atenuado (`low-sample`).
 - OP.GG y U.GG **no** traen el Atlas mundial en el inicial de support (solo pociones). La mejora (Tejesueños...) sale en `last_items`.
 
 ## Estado y pendientes

@@ -238,6 +238,7 @@ a { color: var(--accent-2-text); }
 .gold { color: var(--accent-text); }
 .win { color: var(--win); }
 .loss { color: var(--loss); }
+.low-sample { color: var(--text-muted); }
 .num { font-variant-numeric: tabular-nums; }
 kbd {
   display: inline-block; min-width: 18px; padding: 0 5px;

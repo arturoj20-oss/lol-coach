@@ -4,7 +4,7 @@ const { EventEmitter } = require('events');
 const fs = require('fs');
 const path = require('path');
 const opgg = require('./opgg');
-const { coherentBuilds, tagBuilds, mergeBuilds, enemyContext, itemLayout, supportStarter, supportUpgrades } = require('./buildsets');
+const { coherentBuilds, MIN_GUIDE_GAMES, tagBuilds, mergeBuilds, enemyContext, itemLayout, supportStarter, supportUpgrades } = require('./buildsets');
 const ugg = require('./ugg');
 const { matchupCheck } = require('./matchup');
 const { log } = require('./log');
@@ -142,6 +142,8 @@ function buildFrom(data, championId, role) {
     skillPriority: order.length ? skillPriority(order) : [],
     starter: ids(data.starter_items),
     core,
+    // Partidas y victorias del nucleo en el analisis general (respaldo si la guia contra el rival tiene poca muestra)
+    corePlay: data.core_items?.play || null, coreWin: data.core_items?.win ?? null,
     boots: ids(data.boots),
     situational,
     situationalAll,
@@ -337,7 +339,7 @@ class Draft extends EventEmitter {
         log(`alternativas de ${key}: ${e.message}`);
       }
       if (this.buildKey !== token) return;
-      const opggOptions = tagBuilds(coherentBuilds(build, guide, this.champions.ddragon?.items || {}), build, 'opgg');
+      const opggOptions = tagBuilds(coherentBuilds(build, guide, this.champions.ddragon?.items || {}, MIN_GUIDE_GAMES), build, 'opgg');
       // Builds de OTP (Challenger y Gran Maestro) si hay partidas suficientes; si no, se piden para la proxima
       this.otp?.prioritize([championId], true);
       const otpOptions = this.otp ? tagBuilds(this.otp.options(championId, role, this.champions.ddragon?.items || {}), build, 'otp') : [];

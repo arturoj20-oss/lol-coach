@@ -4,7 +4,7 @@
 // OP.GG y U.GG (con su cache de 12 h): funciona sin el cliente de LoL
 const opgg = require('./opgg');
 const { buildFrom } = require('./draft');
-const { coherentBuilds, tagBuilds, mergeBuilds } = require('./buildsets');
+const { coherentBuilds, MIN_GUIDE_GAMES, tagBuilds, mergeBuilds } = require('./buildsets');
 const ugg = require('./ugg');
 
 const ROLES = ['top', 'jungle', 'mid', 'adc', 'support'];
@@ -60,7 +60,7 @@ class ChampStats {
     const items = this.champions.ddragon?.items || {};
     this.otp?.prioritize([championId], true);
     const otpOptions = this.otp ? tagBuilds(this.otp.options(championId, role, items), build, 'otp') : [];
-    const options = mergeBuilds(tagBuilds(coherentBuilds(build, guide, items), build, 'opgg'), uggData?.options || [], otpOptions);
+    const options = mergeBuilds(tagBuilds(coherentBuilds(build, guide, items, MIN_GUIDE_GAMES), build, 'opgg'), uggData?.options || [], otpOptions);
 
     return {
       championId, role,

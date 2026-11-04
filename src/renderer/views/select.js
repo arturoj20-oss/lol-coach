@@ -33,6 +33,11 @@ const SHARD_ROWS = [[5008, 5005, 5007], [5008, 5010, 5001], [5011, 5013, 5001]];
 
 const wrCls = v => (v == null ? '' : v >= .5 ? 'win' : 'loss');
 const pctOr = v => (v == null ? '—' : fmt.pct(v));
+// Builds con pocas partidas: el % no es fiable (1 o 2 partidas dan 100 %) y se pinta atenuado
+const LOW_SAMPLE = 20;
+const lowSample = x => x.games != null && x.games < LOW_SAMPLE;
+const buildWrCls = x => (lowSample(x) ? 'low-sample' : wrCls(x.winRate));
+const buildWrTip = x => (lowSample(x) ? `Solo ${x.games} ${x.games === 1 ? 'partida' : 'partidas'}: el % no es fiable` : '');
 // % de victorias con 50 partidas virtuales al 50 %: ordena "Mejor" sin premiar muestras pequenas
 const smoothWr = o => (o.games ? ((o.winRate ?? .5) * o.games + 25) / (o.games + 50) : .5);
 const lsGet = (k, def) => { try { return localStorage.getItem(k) || def; } catch { return def; } };
@@ -309,13 +314,14 @@ function buildPanel({ options = [], chosen = 0, act, base, vs, sort = 'best', fl
     src, rows: options.map((x, i) => ({ x, i })).filter(r => (r.x.source || 'opgg') === src).sort((a, c) => key(c.x) - key(a.x)),
   })).filter(g => g.rows.length);
   const otpPlayers = Math.max(0, ...options.filter(x => x.source === 'otp').map(x => x.otp?.players || 0));
-  const groupNote = { opgg: vs ? `contra ${Dd.champName(vs)}` : 'análisis general', ugg: 'Esmeralda+ · mundo',
+  const opggGeneral = options.some(x => (x.source || 'opgg') === 'opgg') && options.filter(x => (x.source || 'opgg') === 'opgg').every(x => x.general);
+  const groupNote = { opgg: vs && !opggGeneral ? `contra ${Dd.champName(vs)}` : vs ? `análisis general (poca muestra contra ${Dd.champName(vs)})` : 'análisis general', ugg: 'Esmeralda+ · mundo',
     otp: `${otpPlayers} ${otpPlayers === 1 ? 'main' : 'mains'} · últimos 30 días` };
   const row = ({ x, i }) => html`<button type="button" class="bp-row ${i === chosen ? 'on' : ''}" data-act="${act}" data-index="${i}" aria-pressed="${i === chosen}"
-      data-tip-title="${Dd.runeName(x.keystone)} · ${x.label}" data-tip-list="${[...x.core.map(id => Dd.itemName(id)), x.games ? `${fmt.int(x.games)} partidas (${SOURCES[x.source] || ''})` : '', ...(x.otp?.names || []).map(n => `Main: ${otpName(n)}, ${n.games} partidas`)].filter(Boolean).join('\n')}">
+      data-tip-title="${Dd.runeName(x.keystone)} · ${x.label}" data-tip-list="${[...x.core.map(id => Dd.itemName(id)), x.games ? `${fmt.int(x.games)} partidas (${SOURCES[x.source] || ''})` : '', buildWrTip(x), ...(x.otp?.names || []).map(n => `Main: ${otpName(n)}, ${n.games} partidas`)].filter(Boolean).join('\n')}">
       ${icon('rune', x.keystone, { size: 30, round: true, cls: 'rune bp-row-key', tip: false })}
       <b class="bp-row-name">${Dd.runeName(x.keystone)}</b>
-      <b class="bp-row-wr num ${wrCls(x.winRate)}">${pctOr(x.winRate)}</b>
+      <b class="bp-row-wr num ${buildWrCls(x)}">${pctOr(x.winRate)}</b>
       <span class="bp-row-sub">${x.source === 'otp' && x.otp?.names?.[0] ? otpName(x.otp.names[0]) + (x.otp.names.length > 1 ? ` +${x.otp.names.length - 1}` : '') : x.label}${x.games ? html` · <span class="num">${fmt.int(x.games)}</span>` : ''}</span>
       <span class="bp-row-icos">${x.core.slice(0, 3).map(id => icon('item', id, { size: 22, tip: false }))}</span>
     </button>`;
@@ -326,7 +332,7 @@ function buildPanel({ options = [], chosen = 0, act, base, vs, sort = 'best', fl
   for (const r of groups.flatMap(g => g.rows)) if (!byKey.has(r.x.keystone)) byKey.set(r.x.keystone, r);
   const variants = byKey.size > 1 && byKey.size < options.length ? html`<div class="rv-list" role="group" aria-label="Variantes de runas">${[...byKey.values()].map(({ x, i }) => html`
     <button type="button" class="rv ${x.keystone === o?.keystone ? 'on' : ''}" data-act="${act}" data-index="${i}" data-tip="${Dd.runeName(x.keystone)} (${SOURCES[x.source] || ''})">
-      ${icon('rune', x.keystone, { size: 22, round: true, cls: 'rune', tip: false })}<span class="rv-txt"><b class="num ${wrCls(x.winRate)}">${pctOr(x.winRate)}</b><span class="num">${x.games ? fmt.int(x.games) : '—'}</span></span>
+      ${icon('rune', x.keystone, { size: 22, round: true, cls: 'rune', tip: false })}<span class="rv-txt"><b class="num ${buildWrCls(x)}">${pctOr(x.winRate)}</b><span class="num">${x.games ? fmt.int(x.games) : '—'}</span></span>
     </button>`)}</div>` : '';
 
   const list = options.length ? html`<div class="bp-list">
@@ -343,7 +349,7 @@ function buildPanel({ options = [], chosen = 0, act, base, vs, sort = 'best', fl
         ${o ? html`${icon('rune', o.keystone, { size: 30, round: true, cls: 'rune key' })}<span class="bp-dtitle"><b>${Dd.runeName(o.keystone)}</b><span class="muted">${o.label}</span></span>${sourceTags(o)}`
           : html`<span class="bp-dtitle"><b>Build más jugada</b></span>`}
         <span class="spacer"></span>
-        ${(o || b).games ? html`<span class="bp-dstat num"><b class="${wrCls((o || b).winRate)}">${pctOr((o || b).winRate)}</b> <span class="muted">· ${fmt.int((o || b).games)} partidas</span></span>` : ''}
+        ${(o || b).games ? html`<span class="bp-dstat num"><b class="${buildWrCls(o || b)}">${pctOr((o || b).winRate)}</b> <span class="muted">· ${fmt.int((o || b).games)} partidas${lowSample(o || b) ? ' (poca muestra)' : ''}</span></span>` : ''}
         ${extraHead}
       </div>
       ${o ? otpByline(o.otp) : ''}

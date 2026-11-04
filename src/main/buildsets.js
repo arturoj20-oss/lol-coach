@@ -94,14 +94,17 @@ function popularityOf(base, guide) {
 }
 
 // base: build de buildFrom (analisis general); guide: guia de enfrentamiento (puede faltar);
-// items: objetos de Data Dragon (con tags). Devuelve hasta 2 builds ordenadas por partidas
-function coherentBuilds(base, guide, items) {
+// items: objetos de Data Dragon (con tags); minGames: partidas minimas de un nucleo o pagina de la guia
+// (la guia de OP.GG contra un rival puede traer nucleos de 1 o 2 partidas, con 100 %). Si ningun nucleo
+// llega, se usa el del analisis general (general: true). Devuelve hasta 2 builds ordenadas por partidas
+function coherentBuilds(base, guide, items, minGames = 0) {
   const cores = [];
   for (const c of guide?.core_items || []) {
-    if (!c.ids?.length || cores.some(o => [...o.ids].sort().join() === [...c.ids].sort().join())) continue;
+    if (!c.ids?.length || (c.play || 0) < minGames || cores.some(o => [...o.ids].sort().join() === [...c.ids].sort().join())) continue;
     cores.push({ ids: c.ids, play: c.play, win: c.win, kind: coreKind(c.ids, items) });
   }
-  if (!cores.length && base.core?.length) cores.push({ ids: base.core, play: null, win: null, kind: coreKind(base.core, items) });
+  const general = !cores.length;
+  if (general && base.core?.length) cores.push({ ids: base.core, play: base.corePlay ?? null, win: base.coreWin ?? null, kind: coreKind(base.core, items) });
   if (!cores.length) return [];
 
   // Build 1: el nucleo mas jugado. Build 2: el mas jugado de otro tipo (si tiene al menos el 15 % de
@@ -110,8 +113,8 @@ function coherentBuilds(base, guide, items) {
   const other = cores.find(c => c.kind && c.kind !== first.kind && (!first.play || c.play >= first.play * 0.15)) || cores[1];
   const picked = [first, other].filter(Boolean);
 
-  const runePages = (guide?.runes || []).filter(r => r.primary_rune_ids?.length);
-  const bootsList = guide?.boots || [];
+  const runePages = (guide?.runes || []).filter(r => r.primary_rune_ids?.length && (r.play || 0) >= minGames);
+  const bootsList = (guide?.boots || []).filter(b => (b.play || 0) >= minGames);
   const popularity = popularityOf(base, guide);
   return picked.map(core => {
     const kind = core.kind;
@@ -131,7 +134,7 @@ function coherentBuilds(base, guide, items) {
       context: contextItems(kind, items, popularity, core.ids),
       // Solo se usa en support (itemSetFor); supportTop: la mejora mas jugada, si hay datos
       support: supportUpgrades(items, popularity), supportTop: supportTopOf(items, popularity),
-      games: core.play, winRate: rate(core),
+      games: core.play, winRate: rate(core), general,
       runeGames: page?.play ?? null, runeWinRate: page ? rate(page) : null,
     };
   });
@@ -176,6 +179,9 @@ function liveContext(enemies, champions, items, championIdOf) {
   if (healers >= 2) { flags.push('antiheal'); reasons.push(`${healers} enemigos se curan con robo de vida u omnivampirismo`); }
   return { flags, reasons };
 }
+
+// Partidas minimas de un nucleo, pagina o botas de la guia de OP.GG contra un rival
+const MIN_GUIDE_GAMES = 20;
 
 // Una build por piedra angular (para fuentes con muchas paginas, como U.GG): para cada una de las
 // piedras angulares mas jugadas (con al menos el 5 % de partidas de la primera), el nucleo mas jugado
@@ -254,4 +260,4 @@ function itemLayout(build, items = {}) {
   };
 }
 
-module.exports = { NAMES, isFinal, itemLayout, supportStarter, supportUpgrades, supportTopOf, coherentBuilds, buildsByKeystone, tagBuilds, mergeBuilds, buildSig, contextItems, enemyContext, liveContext, itemKind, coreKind, KEYSTONE_KIND };
+module.exports = { MIN_GUIDE_GAMES, NAMES, isFinal, itemLayout, supportStarter, supportUpgrades, supportTopOf, coherentBuilds, buildsByKeystone, tagBuilds, mergeBuilds, buildSig, contextItems, enemyContext, liveContext, itemKind, coreKind, KEYSTONE_KIND };
