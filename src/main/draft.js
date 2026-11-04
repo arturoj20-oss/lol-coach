@@ -745,21 +745,46 @@ class Draft extends EventEmitter {
         if (e.status !== 404) throw e;   // ya borrada
       }
     }
+    let reused = null;
     if (!ours.length) {
       const inv = await this.lcu.request('GET', '/lol-perks/v1/inventory', undefined, 5000).catch(() => null);
       const custom = pages.filter(p => p.isDeletable).length;
       // canAddCustomPage lo da el cliente directamente; ownedPageCount, en clientes que no lo traen
       const full = inv?.canAddCustomPage === false || (inv?.canAddCustomPage == null && inv?.ownedPageCount != null && custom >= inv.ownedPageCount);
-      if (full) {
+      // Sin hueco: se reutiliza una pagina de otra app (iTero, Blitz), que la rehace sola; las del jugador no se tocan
+      const other = full && pages.find(p => p.isDeletable && /^(iTero|Blitz)/i.test(String(p.name)));
+      if (other) {
+        try {
+          await this.lcu.request('DELETE', `/lol-perks/v1/pages/${other.id}`, undefined, 5000);
+        } catch (e) {
+          if (e.status !== 404) throw e;
+        }
+        log(`runas: sin hueco; se reutiliza la pagina "${other.name}"`);
+        reused = other;
+      } else if (full) {
         const err = new Error(`sin hueco para páginas (${custom}/${inv.ownedPageCount})`);
-        err.userMessage = 'no queda hueco para otra página; borra una o llámala «LoL Coach»';
+        err.userMessage = 'no queda hueco para otra página; borra una o llámala «LoL Coach» (también se reutilizan las de iTero y Blitz)';
         throw err;
       }
     }
-    await this.lcu.request('POST', '/lol-perks/v1/pages', {
+    const page = {
       name: `LoL Coach: ${name}`, primaryStyleId: runes.primaryStyle, subStyleId: runes.subStyle,
       selectedPerkIds: perks, current: true,
-    }, 5000);
+    };
+    try {
+      await this.lcu.request('POST', '/lol-perks/v1/pages', page, 5000);
+    } catch (e) {
+      // El inventario no siempre avisa: con "Max pages reached" se reutiliza una pagina de iTero o Blitz y se reintenta
+      if (!/max pages/i.test(String(e.body || e.message))) throw e;
+      const other = pages.find(p => p.isDeletable && /^(iTero|Blitz)/i.test(String(p.name)) && !ours.includes(p) && p !== reused);
+      if (!other) {
+        e.userMessage = 'no queda hueco para otra página; borra una o llámala «LoL Coach» (también se reutilizan las de iTero y Blitz)';
+        throw e;
+      }
+      await this.lcu.request('DELETE', `/lol-perks/v1/pages/${other.id}`, undefined, 5000).catch(x => { if (x.status !== 404) throw x; });
+      log(`runas: sin hueco; se reutiliza la pagina "${other.name}"`);
+      await this.lcu.request('POST', '/lol-perks/v1/pages', page, 5000);
+    }
     log(`runas: página "LoL Coach: ${name}" creada (${perks.join(',')})`);
   }
 
