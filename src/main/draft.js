@@ -748,7 +748,9 @@ class Draft extends EventEmitter {
     if (!ours.length) {
       const inv = await this.lcu.request('GET', '/lol-perks/v1/inventory', undefined, 5000).catch(() => null);
       const custom = pages.filter(p => p.isDeletable).length;
-      if (inv?.ownedPageCount != null && custom >= inv.ownedPageCount) {
+      // canAddCustomPage lo da el cliente directamente; ownedPageCount, en clientes que no lo traen
+      const full = inv?.canAddCustomPage === false || (inv?.canAddCustomPage == null && inv?.ownedPageCount != null && custom >= inv.ownedPageCount);
+      if (full) {
         const err = new Error(`sin hueco para páginas (${custom}/${inv.ownedPageCount})`);
         err.userMessage = 'no queda hueco para otra página; borra una o llámala «LoL Coach»';
         throw err;
