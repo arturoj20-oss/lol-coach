@@ -39,7 +39,7 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
 - ❌ Usar el historial del cliente cuando no hay clave. Si se comparte la app, cada persona pone sus propias claves. La app se comparte con compañeros y cada uno tiene su propia clave personal de Riot. Los datos de mains del instalador (`data/mains`) son de la clave del usuario: se le avisó de que, estrictamente, eso queda fuera del uso personal, aunque con riesgo bajo.
 - ❌ IA en las notas del parche, para que también las lea quien no tiene Claude.
 - "Más claro" = **más fácil de leer**, no un tema blanco. Tema oscuro gris pizarra por defecto.
-- Runas **una vez al bloquear** (06/11, sustituye a la decisión del 04/11 de la v1.2.12, «solo con un clic»): se importan una sola vez por campeón al bloquearlo. Después solo cambian al pulsar una build en Mi selección o «Importar build»; nunca al revelarse enemigos (ahí solo se reescribe el set de objetos). Siempre en una única página «LoL Coach». La casilla «Runas» de Ajustes (`autoImport.runes`) vuelve, activada por defecto, y al desactivarla no se importan al bloquear. Sin publicar.
+- Runas **una vez al bloquear** (06/11, sustituye a la decisión del 04/11 de la v1.2.12, «solo con un clic»): se importan una sola vez por campeón al bloquearlo. Después solo cambian al pulsar una build en Mi selección o «Importar build»; nunca al revelarse enemigos (ahí solo se reescribe el set de objetos). Siempre en una única página «LoL Coach». La casilla «Runas» de Ajustes (`autoImport.runes`) vuelve, activada por defecto, y al desactivarla no se importan al bloquear. **Publicado en la v1.2.13** (06/11).
 - Normas de Riot:
   - sin timers de definitivas ni de Flash enemigos;
   - sin "haz X ahora" en partida;
