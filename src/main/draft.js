@@ -310,13 +310,14 @@ class Draft extends EventEmitter {
       this.loadBuild(myChampionId, role, enemyIds, buildKey);
       this.loadMatchup(myChampionId, role, enemyIds, buildKey);
     }
-    // Importar al bloquear (una vez por campeon): hechizos y objetos. Las runas nunca se importan solas
-    // (decision del usuario): solo al pulsar una build o "Importar build", para poder jugar con las suyas
+    // Importar al bloquear (una vez por campeon): runas, hechizos y objetos. Despues las runas solo
+    // cambian al pulsar una build o "Importar build" (decision del usuario): al revelarse enemigos
+    // solo se reescribe el set de objetos
     const { autoImport } = this.config.get();
     if (locked && this.state.build?.championId === myChampionId && this.importedFor !== myChampionId &&
-        (autoImport.spells || autoImport.items)) {
+        (autoImport.runes || autoImport.spells || autoImport.items)) {
       this.importedFor = myChampionId;
-      this.importBuild({ spells: autoImport.spells, items: autoImport.items, runes: false, auto: true }).catch(e => log(`importar: ${e.message}`));
+      this.importBuild({ runes: autoImport.runes, spells: autoImport.spells, items: autoImport.items, auto: true }).catch(e => log(`importar: ${e.message}`));
     }
     this.emitState();
   }

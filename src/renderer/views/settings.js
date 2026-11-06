@@ -46,10 +46,11 @@ App.register('settings', {
             <div class="seg role-seg" role="group" aria-label="Rol">${roles.map(r => html`<button type="button" data-role="${r}">${r ? roleName(r) : 'Auto'}</button>`)}</div></div>
           <div class="field"><span class="label">Importar al bloquear</span>
             <div class="checks-row">
+              <label class="check"><input type="checkbox" data-k="autoImport.runes"><span>Runas</span></label>
               <label class="check"><input type="checkbox" data-k="autoImport.spells"><span>Hechizos</span></label>
               <label class="check"><input type="checkbox" data-k="autoImport.items"><span>Objetos</span></label>
             </div>
-            <p class="muted small set-hint">Las runas nunca se importan solas: solo cuando pulsas una build o «Importar build» en Campeones. Van siempre a una única página, «LoL Coach», y tus otras páginas no se tocan.</p></div>
+            <p class="muted small set-hint">Las runas se importan una sola vez, al bloquear. Después solo cambian si pulsas una build o «Importar build» en Campeones. Van siempre a una única página, «LoL Coach», y tus otras páginas no se tocan.</p></div>
           <div class="sep"></div>
           <div class="field"><div class="key-head"><label class="check"><input type="checkbox" data-k="otpBuilds"><span>Descargar datos de mains con mi clave de Riot</span></label><span class="key-badge" data-otp-badge></span></div>
             <p class="muted small set-hint">La app ya trae datos de mains (los 3 más activos de cada campeón en EUW, KR y NA): sus builds van a la lista y sus enfrentamientos a «Tu enfrentamiento», también con esto desactivado. Activado, descarga con tu clave de Riot los campeones que falten y pone al día los que ya trae. Va en segundo plano (cerca de 1 hora por campeón); empieza por tus campeones y el que estés viendo.</p>

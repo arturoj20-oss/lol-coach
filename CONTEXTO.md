@@ -1,6 +1,6 @@
 # LoL Coach: contexto (versión corta)
 
-Actualizado: 05/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
+Actualizado: 06/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
 
 ## Usuario y entorno
 - Uso **personal**. Cuenta Artiloked#EUW, Esmeralda, jungla (Shaco, Shyvana). Responder en **español de España**. Comentarios del código en español, breves y sin acentos en `src/main`.
@@ -39,7 +39,7 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
 - ❌ Usar el historial del cliente cuando no hay clave. Si se comparte la app, cada persona pone sus propias claves. La app se comparte con compañeros y cada uno tiene su propia clave personal de Riot. Los datos de mains del instalador (`data/mains`) son de la clave del usuario: se le avisó de que, estrictamente, eso queda fuera del uso personal, aunque con riesgo bajo.
 - ❌ IA en las notas del parche, para que también las lea quien no tiene Claude.
 - "Más claro" = **más fácil de leer**, no un tema blanco. Tema oscuro gris pizarra por defecto.
-- Runas **solo con un clic del usuario** (04/11): pulsar una build en Mi selección o «Importar build». Nunca al bloquear ni al revelarse enemigos, para poder jugar con sus páginas propias. Siempre en una única página «LoL Coach». Al bloquear solo se importan hechizos y objetos (`autoImport.runes` ya no se usa ni sale en Ajustes). **Publicado en la v1.2.12** (05/11).
+- Runas **una vez al bloquear** (06/11, sustituye a la decisión del 04/11 de la v1.2.12, «solo con un clic»): se importan una sola vez por campeón al bloquearlo. Después solo cambian al pulsar una build en Mi selección o «Importar build»; nunca al revelarse enemigos (ahí solo se reescribe el set de objetos). Siempre en una única página «LoL Coach». La casilla «Runas» de Ajustes (`autoImport.runes`) vuelve, activada por defecto, y al desactivarla no se importan al bloquear. Sin publicar.
 - Normas de Riot:
   - sin timers de definitivas ni de Flash enemigos;
   - sin "haz X ahora" en partida;
