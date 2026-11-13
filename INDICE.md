@@ -64,7 +64,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `views/select.js` | Campeones: Mi selección y el explorador; `champButtons` (Fijar/Bloquear), `buildPanel` (maestro-detalle de builds), `runesView`, `skillsView`, `itemLayout`, `contextBlock` |
 | `views/history.js` | Historial y análisis post-partida con el coach (`miniMarkdown`) |
 | `views/patch.js` | Notas del parche: filtros, veredictos y «Tus campeones» |
-| `views/settings.js` | Ajustes |
+| `views/settings.js` | Ajustes; easter egg `devOptions` («Opciones de Desarrollo» → rickroll) |
 | `theme.css`, `app.css`, `views/*.css` | Estilos: tokens en `theme.css` y uno por vista |
 | `overlay.html/.js/.css` | Overlay: `SKILL_BAR` (calibrado), avisos, franja de Tab (`renderTab`) y etiquetas del marcador (`renderScout`, `scoutInfo`, `SCOREBOARD` medido el 03/11) |
 | `mock-api.js` | Datos de ejemplo sin Electron; F9 abre el simulador de fases |

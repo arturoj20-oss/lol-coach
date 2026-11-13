@@ -33,6 +33,8 @@ App.register('settings', {
             <p class="muted small set-hint">CS medio de tu campeón en esa posición (U.GG, Esmeralda+) según la duración de tus partidas. Si no hay datos, se usa el valor manual.</p>
             <div class="range-row" data-cs-manual><input class="range" type="range" min="1" max="10" step="0.5" data-k="csTarget" aria-label="Objetivo manual de CS por minuto"><output class="num" data-out="csTarget"></output></div>
           </div>
+          <div class="sep"></div>
+          <div class="update-row"><p class="muted small set-hint grow">Opciones avanzadas para depurar la app.</p><button type="button" class="btn small" data-act="devOptions">Opciones de Desarrollo</button></div>
         </section>
 
         <section class="card">
@@ -136,6 +138,8 @@ App.register('settings', {
         window.api.action('testOverlay').then(() => App.toast('Overlay de prueba visible durante 10 s', 'ok')).catch(err => App.toast(err.message, 'error'));
       }
       if (act.dataset.act === 'saveKey') this.saveKey(act.dataset.name);
+      // Easter egg: rickroll en el navegador (main.js abre fuera cualquier window.open)
+      if (act.dataset.act === 'devOptions') window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
       if (act.dataset.act === 'checkUpdate') {
         // El aviso de «al día» vuelve a salir tras una comprobacion pedida a mano
         App.updateToastShown = false;
