@@ -87,6 +87,7 @@ const App = {
       'Análisis de partida y consejos de selección más rápidos y con un modelo entrenado con partidas de Diamante+.',
       'Plazas limitadas durante la beta: actívalo en <b>Ajustes › General › «Activar Características de Coach Remoto con IA»</b>.',
     ],
+    '1.2.16': ['Nuevo en <b>Ajustes</b>: <b>Reportar un bug o sugerencia</b>. Escribe qué ha fallado o qué te gustaría y me llega directamente.'],
   },
 
   whatsNew() {

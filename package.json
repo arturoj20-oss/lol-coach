@@ -1,7 +1,7 @@
 {
   "name": "lol-coach",
   "productName": "LoL Coach",
-  "version": "1.2.15",
+  "version": "1.2.16",
   "private": true,
   "description": "Asistente personal para League of Legends: seleccion de campeones, overlay de partida y analisis post-partida",
   "author": "Artiloked",
