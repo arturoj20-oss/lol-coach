@@ -460,6 +460,18 @@ class Companion extends EventEmitter {
         this.champStats ||= new ChampStats(this.champions, this.otp);
         return this.champStats.get(Number(args.championId), args.role || '', Number(args.vs) || null);
       }
+      case 'reportPreview':
+      case 'sendReport': {
+        // Reporte de bug o sugerencia desde Ajustes (report.js, webhook de Discord)
+        const report = require('./report');
+        const id = this.profile.identity;
+        const ctx = {
+          version: this.updater?.status.version || require('../../package.json').version,
+          phase: this.phase,
+          riotId: id?.gameName ? `${id.gameName}#${id.tagLine}` : null,
+        };
+        return name === 'reportPreview' ? report.preview(this.dir, ctx) : report.send(this.dir, ctx, args);
+      }
       case 'invitation':
         await this.lcu.request('POST', `/lol-lobby/v2/received-invitations/${encodeURIComponent(args.id)}/${args.accept ? 'accept' : 'decline'}`);
         return true;

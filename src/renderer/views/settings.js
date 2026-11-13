@@ -106,6 +106,19 @@ App.register('settings', {
           ${this.keyField('anthropic', 'Anthropic (API)', 'Solo hace falta si eliges «API de Anthropic».', 'sk-ant-...')}
           <p class="muted small key-note">Las claves se guardan cifradas en este equipo y no se muestran después de guardarlas.</p>
         </section>
+
+        <section class="card report-card">
+          <div class="card-head"><h2>Reportar un bug o sugerencia</h2></div>
+          <div class="seg report-seg" role="group" aria-label="Tipo de reporte">
+            <button type="button" data-report-type="bug" class="on">Bug</button>
+            <button type="button" data-report-type="idea">Sugerencia</button>
+          </div>
+          <textarea class="input report-text" rows="5" maxlength="1500" data-report-text placeholder="¿Qué ha pasado o qué te gustaría que hiciera la app? Si es un bug, cuenta qué hacías cuando falló." aria-label="Texto del reporte"></textarea>
+          <label class="check"><input type="checkbox" data-report-log checked><span>Adjuntar versión, fase del cliente y las últimas líneas del registro</span></label>
+          <label class="check"><input type="checkbox" data-report-riot checked><span>Incluir mi Riot ID para poder contestarme</span></label>
+          <details class="report-preview"><summary class="muted small">Ver lo que se envía</summary><pre class="small" data-report-preview></pre></details>
+          <div class="report-foot"><span class="muted small grow" data-report-msg></span><button type="button" class="btn btn-primary small" data-act="sendReport">Enviar</button></div>
+        </section>
       </div>
     </div>`);
 
@@ -130,6 +143,9 @@ App.register('settings', {
         $$('[data-theme-opt]', this.el).forEach(b => b.classList.toggle('on', b === theme));
         return window.api.setConfig({ theme: theme.dataset.themeOpt });
       }
+      const rtype = e.target.closest('[data-report-type]');
+      if (rtype) { $$('[data-report-type]', this.el).forEach(b => b.classList.toggle('on', b === rtype)); return; }
+      if (e.target.closest('.report-preview summary')) this.reportPreview();
       const ai = e.target.closest('[data-ai]');
       if (ai) return window.api.setConfig({ ai: ai.dataset.ai });
       const act = e.target.closest('[data-act]');
@@ -140,6 +156,7 @@ App.register('settings', {
       if (act.dataset.act === 'saveKey') this.saveKey(act.dataset.name);
       // Easter egg: rickroll dentro de la app (App.rickroll, video local en media/)
       if (act.dataset.act === 'devOptions') App.rickroll();
+      if (act.dataset.act === 'sendReport') this.sendReport(act);
       if (act.dataset.act === 'checkUpdate') {
         // El aviso de «al día» vuelve a salir tras una comprobacion pedida a mano
         App.updateToastShown = false;
@@ -150,6 +167,43 @@ App.register('settings', {
       if (e.key === 'Enter' && e.target.dataset.secret) this.saveKey(e.target.dataset.secret);
     });
     this.apply();
+  },
+
+  // Reporte de bug o sugerencia (report.js en el proceso principal, webhook de Discord)
+  reportOpts() {
+    return {
+      type: $('[data-report-type].on', this.el)?.dataset.reportType || 'bug',
+      text: $('[data-report-text]', this.el).value,
+      withLog: $('[data-report-log]', this.el).checked,
+      withRiotId: $('[data-report-riot]', this.el).checked,
+    };
+  },
+
+  async reportPreview() {
+    const pre = $('[data-report-preview]', this.el);
+    try {
+      const p = await window.api.action('reportPreview');
+      const o = this.reportOpts();
+      const lines = [`Versión: ${p.version}`];
+      if (o.withLog) lines.push(`Fase: ${p.phase}`);
+      if (o.withRiotId) lines.push(`Riot ID: ${p.riotId || '(cliente cerrado: no se envía)'}`);
+      if (o.withLog) lines.push('', 'log.txt:', p.log || '(vacío)');
+      pre.textContent = lines.join('\n');
+    } catch (err) { pre.textContent = err.message; }
+  },
+
+  async sendReport(btn) {
+    const msg = $('[data-report-msg]', this.el);
+    btn.disabled = true;
+    msg.textContent = 'Enviando...';
+    try {
+      await window.api.action('sendReport', this.reportOpts());
+      $('[data-report-text]', this.el).value = '';
+      msg.textContent = '';
+      App.toast('Reporte enviado. ¡Gracias!', 'ok');
+    } catch (err) {
+      msg.textContent = err.message;
+    } finally { btn.disabled = false; }
   },
 
   keyField(name, label, hint, placeholder) {

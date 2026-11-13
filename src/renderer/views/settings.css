@@ -32,3 +32,17 @@
 
 /* Objetivo de CS manual cuando el automatico esta activo: solo de respaldo */
 .range-row.is-fallback { opacity: .55; }
+
+/* Reportar un bug o sugerencia */
+.report-card { display: flex; flex-direction: column; gap: 12px; }
+.report-seg { align-self: flex-start; }
+.report-text { width: 100%; min-height: 96px; resize: vertical; line-height: 1.45; }
+.report-preview summary { cursor: pointer; width: max-content; }
+.report-preview pre {
+  margin: 8px 0 0; padding: 10px 12px; max-height: 220px; overflow: auto;
+  white-space: pre-wrap; word-break: break-word;
+  background: var(--surface-sunken); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+.report-foot { display: flex; align-items: center; gap: 10px; }
+.report-foot .grow { flex: 1; min-width: 0; }

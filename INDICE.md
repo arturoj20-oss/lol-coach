@@ -51,6 +51,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `coach.js` | `Coach.run`, `analyze` (post-partida), `draftAdvice` (selección) |
 | `localclaude.js` | `LocalClaude.find`, `ask` (`claude -p --safe-mode ...`) |
 | `patchnotes.js` | `PatchNotes.get`, `NotesParser` (HTML a secciones, entradas y cambios), `parseChange`, `verdictOf`, `forYou` |
+| `report.js` | Reportes de Ajustes al webhook de Discord: `preview` (lo que se adjunta), `send` (validación, espera de 60 s, `log.txt` como archivo); URL en `report-webhook.txt` (fuera del repositorio) |
 | `config.js` | `Config.get`/`set`/`save` e `importOldConfig` (de lol-auto-accept) |
 | `log.js`, `util.js` | `log`; `mapLimit`, `pct`, `ROLE_*`, `RIFT_QUEUES`, `laneToRole` |
 
@@ -64,7 +65,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `views/select.js` | Campeones: Mi selección y el explorador; `champButtons` (Fijar/Bloquear), `buildPanel` (maestro-detalle de builds), `runesView`, `skillsView`, `itemLayout`, `contextBlock` |
 | `views/history.js` | Historial y análisis post-partida con el coach (`miniMarkdown`) |
 | `views/patch.js` | Notas del parche: filtros, veredictos y «Tus campeones» |
-| `views/settings.js` | Ajustes; easter egg `devOptions` («Activar Características de Coach Remoto con IA» → `App.rickroll`) |
+| `views/settings.js` | Ajustes; tarjeta de reportes (`reportOpts`, `reportPreview`, `sendReport`); easter egg `devOptions` («Activar Características de Coach Remoto con IA» → `App.rickroll`) |
 | `theme.css`, `app.css`, `views/*.css` | Estilos: tokens en `theme.css` y uno por vista |
 | `overlay.html/.js/.css` | Overlay: `SKILL_BAR` (calibrado), avisos, franja de Tab (`renderTab`) y etiquetas del marcador (`renderScout`, `scoutInfo`, `SCOREBOARD` medido el 03/11) |
 | `mock-api.js` | Datos de ejemplo sin Electron; F9 abre el simulador de fases |

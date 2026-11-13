@@ -9,3 +9,6 @@ config.json
 
 # Historico largo del proyecto (solo en local); CONTEXTO.md e INDICE.md si se suben
 docs/contexto-historico.md
+
+# URL del webhook de Discord para los reportes (entra en el instalador, no en el repositorio)
+src/main/report-webhook.txt
