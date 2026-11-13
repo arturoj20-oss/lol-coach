@@ -227,6 +227,13 @@ async function start() {
   initOpgg(dir);
   config = new Config(dir);
   companion = new Companion(config, dir);
+  // Aviso a Discord de quien abre cada version nueva (solo la app instalada, no en desarrollo)
+  if (app.isPackaged) {
+    require('./report').watchInstall({
+      config, version: app.getVersion(),
+      identity: () => { const id = companion.profile.identity; return id?.gameName ? `${id.gameName}#${id.tagLine}` : null; },
+    });
+  }
 
   const icon = nativeImage.createFromPath(ICON);
   createTray(icon.resize({ width: 16, height: 16 }));

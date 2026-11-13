@@ -51,7 +51,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `coach.js` | `Coach.run`, `analyze` (post-partida), `draftAdvice` (selección) |
 | `localclaude.js` | `LocalClaude.find`, `ask` (`claude -p --safe-mode ...`) |
 | `patchnotes.js` | `PatchNotes.get`, `NotesParser` (HTML a secciones, entradas y cambios), `parseChange`, `verdictOf`, `forYou` |
-| `report.js` | Reportes de Ajustes al webhook de Discord: `preview` (lo que se adjunta), `send` (validación, espera de 60 s, `log.txt` como archivo); URL en `report-webhook.txt` (fuera del repositorio) |
+| `report.js` | Reportes de Ajustes al webhook de Discord: `preview` (lo que se adjunta), `send` (validación, espera de 60 s, `log.txt` como archivo); URL en `report-webhook.txt` (fuera del repositorio); `watchInstall` (aviso de instalación una vez por versión, `installs-webhook.txt`, `config.lastRunVersion`) |
 | `config.js` | `Config.get`/`set`/`save` e `importOldConfig` (de lol-auto-accept) |
 | `log.js`, `util.js` | `log`; `mapLimit`, `pct`, `ROLE_*`, `RIFT_QUEUES`, `laneToRole` |
 

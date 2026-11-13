@@ -12,6 +12,7 @@ if (git tag --list "v$version") { throw "La v$version ya existe: sube la version
 
 # Sin la URL del webhook (en .gitignore) la version sale sin reportes de bugs
 if (-not (Test-Path 'src\main\report-webhook.txt')) { throw 'Falta src\main\report-webhook.txt (URL del webhook de Discord para los reportes).' }
+if (-not (Test-Path 'src\main\installs-webhook.txt')) { throw 'Falta src\main\installs-webhook.txt (URL del webhook de Discord para los avisos de instalacion).' }
 
 $token = gh auth token
 if (-not $token) { throw 'No hay sesion de GitHub: ejecuta gh auth login.' }

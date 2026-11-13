@@ -12,3 +12,4 @@ docs/contexto-historico.md
 
 # URL del webhook de Discord para los reportes (entra en el instalador, no en el repositorio)
 src/main/report-webhook.txt
+src/main/installs-webhook.txt

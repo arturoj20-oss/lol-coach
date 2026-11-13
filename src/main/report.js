@@ -7,8 +7,11 @@ const os = require('os');
 const path = require('path');
 const { log } = require('./log');
 
+// installs-webhook.txt: canal de instalaciones (aviso de quien abre cada version nueva)
 const WEBHOOK_FILE = path.join(__dirname, 'report-webhook.txt');
+const INSTALLS_FILE = path.join(__dirname, 'installs-webhook.txt');
 const WEBHOOK_RE = /^https:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
+const INSTALL_WAIT = 3 * 60 * 1000;
 const LOG_LINES = 30;
 const MIN_TEXT = 10;
 const MAX_TEXT = 1500;
@@ -17,11 +20,38 @@ const TYPES = { bug: { title: 'Bug', emoji: '🐞', color: 0xF25A6E }, idea: { t
 
 let lastSent = 0;
 
-function webhookUrl() {
+function webhookUrl(file = WEBHOOK_FILE) {
   try {
-    const url = fs.readFileSync(WEBHOOK_FILE, 'utf8').trim();
+    const url = fs.readFileSync(file, 'utf8').trim();
     return WEBHOOK_RE.test(url) ? url : null;
   } catch { return null; }
+}
+
+// Aviso de instalacion: una vez por version (config.lastRunVersion). Espera al Riot ID del cliente
+// hasta INSTALL_WAIT; si no llega, avisa sin el. Si falla el envio, se reintenta al siguiente arranque
+function watchInstall({ config, version, identity }) {
+  const url = webhookUrl(INSTALLS_FILE);
+  const prev = config.get().lastRunVersion || null;
+  if (!url || prev === version) return;
+  const start = Date.now();
+  const timer = setInterval(async () => {
+    const id = identity();
+    if (!id && Date.now() - start < INSTALL_WAIT) return;
+    clearInterval(timer);
+    const who = id ? `**${id}**` : 'Alguien (sin cliente de LoL abierto)';
+    const content = prev ? `${who} ha actualizado de la ${prev} a la **${version}**` : `${who} usa la **${version}** (primera vez que avisa)`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'LoL Coach', content, allowed_mentions: { parse: [] } }),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) throw new Error(`Discord respondio ${res.status}`);
+      config.set({ lastRunVersion: version });
+      log(`instalacion: avisado (${prev || 'nueva'} -> ${version})`);
+    } catch (e) { log(`instalacion: ${e.message}`); }
+  }, 10 * 1000);
+  timer.unref?.();
 }
 
 // Ultimas lineas del registro, sin la carpeta del usuario de Windows
@@ -73,4 +103,4 @@ async function send(dir, ctx, args = {}) {
   return true;
 }
 
-module.exports = { preview, send };
+module.exports = { preview, send, watchInstall };
