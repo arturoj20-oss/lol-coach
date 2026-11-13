@@ -66,6 +66,7 @@ const App = {
     this.data[channel] = data;
     if (channel === 'champions') Dd.set(data);
     if (channel === 'config') Theme.set(data?.theme);
+    if (channel === 'draft') this.easterEggs(prev, data);
     for (const v of Object.values(this.views)) {
       if (v.channels.includes(channel)) {
         try { v.update(channel, prev); } catch (err) { console.error(`[${channel}]`, err); }
@@ -73,6 +74,12 @@ const App = {
     }
     this.autoNavigate(channel, data);
     if (['state', 'draft', 'live', 'scouting', 'postgame'].includes(channel)) this.paintTopbar();
+  },
+
+  // Easter eggs de la seleccion: al bloquear Tryndamere (id 23) suena su audio una vez
+  easterEggs(prev, draft) {
+    const tryn = d => !!(d?.locked && d.myChampionId === 23);
+    if (tryn(draft) && !tryn(prev)) new Audio('sounds/tryndamere.mp3').play().catch(() => {});
   },
 
   // Cambia de vista sola en los momentos clave; despues el usuario puede moverse libremente
