@@ -156,6 +156,8 @@ function cleanConfig(patch) {
   if ('role' in patch && ['', 'top', 'jungle', 'mid', 'adc', 'support'].includes(patch.role)) clean.role = patch.role;
   if ('ai' in patch && ['local', 'api'].includes(patch.ai)) clean.ai = patch.ai;
   if ('theme' in patch && ['dark', 'light', 'system'].includes(patch.theme)) clean.theme = patch.theme;
+  // Ultima version cuyas novedades ya se vieron (aviso de una sola vez tras actualizar)
+  if ('seenVersion' in patch && /^\d+\.\d+\.\d+$/.test(patch.seenVersion)) clean.seenVersion = patch.seenVersion;
   for (const key of ['pick', 'ban']) {
     if (!(key in patch)) continue;
     const v = patch[key];

@@ -209,3 +209,27 @@ body {
 /* Los botones desactivados no reciben el raton: el tooltip lo muestra su envoltorio */
 .ai-card [data-tip] > .btn:disabled, .test-wrap > .btn:disabled { pointer-events: none; }
 .ai-card [data-tip], .test-wrap { display: inline-flex; }
+
+/* Novedades tras actualizar (App.whatsNew): una sola vez por version */
+.whats-new {
+  position: fixed; inset: 0; z-index: 900;
+  display: grid; place-items: center; padding: 16px;
+  background: rgba(0, 0, 0, .55);
+  animation: fade-in var(--dur) var(--ease);
+}
+.whats-new-card {
+  width: min(420px, 100%);
+  padding: 20px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-top: 3px solid var(--accent-2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: rise-in var(--dur) var(--ease);
+}
+.whats-new-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.whats-new-head svg { width: 20px; height: 20px; flex: none; color: var(--accent-2-text); }
+.whats-new-head h2 { margin: 0; font-size: 17px; color: var(--text-hi); }
+.whats-new ul { margin: 12px 0 18px; padding-left: 20px; color: var(--text); line-height: 1.5; }
+.whats-new li + li { margin-top: 6px; }
+.whats-new-foot { display: flex; justify-content: flex-end; }

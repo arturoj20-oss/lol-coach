@@ -56,6 +56,7 @@ const App = {
     else this.go('home');
 
     this.paintTopbar();
+    this.whatsNew();
     for (const ch of ['config', 'state', 'champions', 'recs', 'draft', 'scouting', 'live', 'profile', 'postgame', 'otp']) {
       window.api.on(ch, data => this.set(ch, data));
     }
@@ -74,6 +75,36 @@ const App = {
     }
     this.autoNavigate(channel, data);
     if (['state', 'draft', 'live', 'scouting', 'postgame'].includes(channel)) this.paintTopbar();
+  },
+
+  // Novedades de cada version: se enseñan una sola vez al abrir la version nueva (config.seenVersion).
+  // Solo las versiones con algo que contar; los easter eggs no se anuncian
+  WHATS_NEW: {
+    '1.2.14': ['Nuevo botón en <b>Ajustes › General</b>: «Opciones de Desarrollo».'],
+  },
+
+  whatsNew() {
+    const version = this.data.state?.update?.version;
+    const notes = this.WHATS_NEW[version];
+    if (!notes || this.data.config?.seenVersion === version) return;
+    const box = document.createElement('div');
+    box.className = 'whats-new';
+    setHtml(box, html`<div class="whats-new-card" role="dialog" aria-modal="true" aria-labelledby="wnTitle">
+      <div class="whats-new-head">${raw(SVG.spark)}<h2 id="wnTitle">LoL Coach se ha actualizado</h2></div>
+      <p class="muted">Ya tienes la versión <b class="hi">${version}</b>. Novedades:</p>
+      <ul>${notes.map(n => html`<li>${raw(n)}</li>`)}</ul>
+      <div class="whats-new-foot"><button class="btn btn-primary" data-wn="ok">Entendido</button></div>
+    </div>`);
+    const close = () => {
+      window.api.setConfig({ seenVersion: version });
+      document.removeEventListener('keydown', onKey);
+      box.remove();
+    };
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    box.addEventListener('click', e => { if (e.target === box || e.target.closest('[data-wn]')) close(); });
+    document.addEventListener('keydown', onKey);
+    document.body.append(box);
+    $('[data-wn]', box).focus();
   },
 
   // Easter eggs de la seleccion: al bloquear Tryndamere (id 23) suena su audio una vez

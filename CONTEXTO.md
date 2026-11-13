@@ -1,6 +1,6 @@
 # LoL Coach: contexto (versión corta)
 
-Actualizado: 06/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
+Actualizado: 13/11/2026. El detalle antiguo, con fórmulas y la historia completa, está en `docs/contexto-historico.md`. Léelo solo si hace falta.
 
 ## Usuario y entorno
 - Uso **personal**. Cuenta Artiloked#EUW, Esmeralda, jungla (Shaco, Shyvana). Responder en **español de España**. Comentarios del código en español, breves y sin acentos en `src/main`.
@@ -136,5 +136,6 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
 - 04/11, **v1.2.11**: un compañero con la 1.2.10 no importaba runas («Max pages reached»): la comprobación por `ownedPageCount` no veía las páginas llenas. Ahora se usa `canAddCustomPage` del inventario y, sin hueco, **se reutiliza una página de iTero o Blitz** (decisión del usuario; las del jugador siguen sin tocarse). Si el cliente responde «Max pages reached» igualmente, se reutiliza y se reintenta. Probado con un cliente simulado; falta verlo en real. También van en esta versión el mínimo de partidas de la guía de OP.GG y la gráfica de LP por cuenta.
 - Visto en el registro del 01/11 (15:12:48-54, Nami): las runas y el set se reimportaron cada segundo, alternando dos builds. Falta saber si fueron clics del usuario o un bucle.
 - Falta probar en real: el overlay en partida, el scouting, el post-partida automático, el coach de IA en la selección y la vista Historial.
-- 13/11, **easter eggs** (petición del usuario, irán varios): en Ajustes > General, el botón «Opciones de Desarrollo» abre un rickroll en el navegador (`devOptions` en `views/settings.js`). Al **bloquear Tryndamere** suena una vez `renderer/sounds/tryndamere.mp3` (3,2 s de un vídeo de YouTube, a 1,25×; `App.easterEggs` en `app.js`, con el canal `draft`). Sin publicar ni probar en una selección real.
+- 13/11, **easter eggs** (petición del usuario, irán varios): en Ajustes > General, el botón «Opciones de Desarrollo» abre un rickroll en el navegador (`devOptions` en `views/settings.js`). Al **bloquear Tryndamere** suena una vez `renderer/sounds/tryndamere.mp3` (3,2 s de un vídeo de YouTube, a 1,25×; `App.easterEggs` en `app.js`, con el canal `draft`). Sin probar en una selección real.
+- 13/11, **novedades tras actualizar** (,  en ): una ventana de una sola vez al abrir una versión con notas; al cerrarla se guarda . Los easter eggs **no se anuncian** (decisión del usuario). Al publicar una versión con cambios visibles, añadir su entrada a . **Publicado en la v1.2.14** (13/11) con el botón y el audio de Tryndamere.
 - `objectives.js`: falta confirmar cuándo se retira el Heraldo. Ahora se supone que se va cuando sale el Barón, a los 20:00.

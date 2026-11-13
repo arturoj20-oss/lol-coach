@@ -57,7 +57,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 ## Interfaz: `src/renderer/`
 | Archivo | Qué contiene |
 |---|---|
-| `index.html`, `app.js` | `App`: navegación, cambio automático de vista según la fase (`PHASE_NAMES`) y barra de actualización (`paintUpdate`), `easterEggs` (sonido al bloquear Tryndamere, `sounds/`) |
+| `index.html`, `app.js` | `App`: navegación, cambio automático de vista según la fase (`PHASE_NAMES`) y barra de actualización (`paintUpdate`), `easterEggs` (sonido al bloquear Tryndamere, `sounds/`), `whatsNew`/`WHATS_NEW` (novedades de una sola vez tras actualizar, `config.seenVersion`) |
 | `util.js` | `html` (plantilla con escape), `setHtml` (no toca el DOM si no hay cambios), `hydrate` (`data-vars`), `fmt`, `Dd`, `icon`, `objIcon`, nombres de rangos y roles |
 | `ui.js` | `Tip`, `Theme`, `Seg`, `Expand`, `ChampPicker`, gráficas SVG (`lineChart`, con `bands` para colorear por rango; `diffChart`, `ring`, `deathMap`, `compareBar`) y estados vacío y cargando |
 | `views/home.js` | Inicio: perfil, LP (`renderLp`, periodos `LP_RANGES`, colores `TIER_BANDS`) y Cliente (invitaciones, elegir cola y posiciones en `lobbyBlock`, buscar, «Próxima selección») |
