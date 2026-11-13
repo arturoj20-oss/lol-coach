@@ -81,6 +81,12 @@ const App = {
   // Solo las versiones con algo que contar; los easter eggs no se anuncian
   WHATS_NEW: {
     '1.2.14': ['Nuevo botón en <b>Ajustes › General</b>: «Opciones de Desarrollo».'],
+    // Texto de broma: el boton lleva al rickroll
+    '1.2.15': [
+      '<b>Coach Remoto con IA</b> (beta): el coach ahora también funciona desde nuestros servidores. Ya no necesitas clave de Anthropic ni tener Claude instalado.',
+      'Análisis de partida y consejos de selección más rápidos y con un modelo entrenado con partidas de Diamante+.',
+      'Plazas limitadas durante la beta: actívalo en <b>Ajustes › General › «Activar Características de Coach Remoto con IA»</b>.',
+    ],
   },
 
   whatsNew() {
@@ -105,6 +111,27 @@ const App = {
     document.addEventListener('keydown', onKey);
     document.body.append(box);
     $('[data-wn]', box).focus();
+  },
+
+  // Easter egg de «Opciones de Desarrollo» (Ajustes): 5 s de rickroll encima de la ventana.
+  // Se cierra solo al terminar, o con un clic o Esc
+  rickroll() {
+    if ($('.rickroll')) return;
+    const box = document.createElement('div');
+    box.className = 'rickroll';
+    const video = document.createElement('video');
+    video.src = 'media/rickroll.webm';
+    video.autoplay = true;
+    video.playsInline = true;
+    box.append(video);
+    const close = () => { document.removeEventListener('keydown', onKey); video.pause(); box.remove(); };
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    video.addEventListener('ended', close);
+    video.addEventListener('error', close);
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    document.body.append(box);
+    video.play().catch(() => {});
   },
 
   // Easter eggs de la seleccion: al bloquear Tryndamere (id 23) suena su audio una vez

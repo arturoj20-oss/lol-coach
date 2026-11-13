@@ -57,14 +57,14 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 ## Interfaz: `src/renderer/`
 | Archivo | Qué contiene |
 |---|---|
-| `index.html`, `app.js` | `App`: navegación, cambio automático de vista según la fase (`PHASE_NAMES`) y barra de actualización (`paintUpdate`), `easterEggs` (sonido al bloquear Tryndamere, `sounds/`), `whatsNew`/`WHATS_NEW` (novedades de una sola vez tras actualizar, `config.seenVersion`) |
+| `index.html`, `app.js` | `App`: navegación, cambio automático de vista según la fase (`PHASE_NAMES`) y barra de actualización (`paintUpdate`), `easterEggs` (sonido al bloquear Tryndamere, `sounds/`), `rickroll` (vídeo de `media/`), `whatsNew`/`WHATS_NEW` (novedades de una sola vez tras actualizar, `config.seenVersion`) |
 | `util.js` | `html` (plantilla con escape), `setHtml` (no toca el DOM si no hay cambios), `hydrate` (`data-vars`), `fmt`, `Dd`, `icon`, `objIcon`, nombres de rangos y roles |
 | `ui.js` | `Tip`, `Theme`, `Seg`, `Expand`, `ChampPicker`, gráficas SVG (`lineChart`, con `bands` para colorear por rango; `diffChart`, `ring`, `deathMap`, `compareBar`) y estados vacío y cargando |
 | `views/home.js` | Inicio: perfil, LP (`renderLp`, periodos `LP_RANGES`, colores `TIER_BANDS`) y Cliente (invitaciones, elegir cola y posiciones en `lobbyBlock`, buscar, «Próxima selección») |
 | `views/select.js` | Campeones: Mi selección y el explorador; `champButtons` (Fijar/Bloquear), `buildPanel` (maestro-detalle de builds), `runesView`, `skillsView`, `itemLayout`, `contextBlock` |
 | `views/history.js` | Historial y análisis post-partida con el coach (`miniMarkdown`) |
 | `views/patch.js` | Notas del parche: filtros, veredictos y «Tus campeones» |
-| `views/settings.js` | Ajustes; easter egg `devOptions` («Opciones de Desarrollo» → rickroll) |
+| `views/settings.js` | Ajustes; easter egg `devOptions` («Activar Características de Coach Remoto con IA» → `App.rickroll`) |
 | `theme.css`, `app.css`, `views/*.css` | Estilos: tokens en `theme.css` y uno por vista |
 | `overlay.html/.js/.css` | Overlay: `SKILL_BAR` (calibrado), avisos, franja de Tab (`renderTab`) y etiquetas del marcador (`renderScout`, `scoutInfo`, `SCOREBOARD` medido el 03/11) |
 | `mock-api.js` | Datos de ejemplo sin Electron; F9 abre el simulador de fases |
