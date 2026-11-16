@@ -190,7 +190,8 @@ const Overlay = {
     box.style.setProperty('--tab-y', `${Number(o.tabOffsetY) || 0}px`);
     box.className = `ov-tab ${o.side === 'left' ? 'left' : 'right'}`;
     const diff = d => html`<b class="${d >= 0 ? 'win' : 'loss'}">${fmt.k(d, true)}</b>`;
-    const csDiff = d => html`<small class="${d >= 0 ? 'win' : 'loss'}">${fmt.signed(d)} CS</small>`;
+    // El marcador del juego da el CS de 10 en 10: la diferencia es aproximada
+    const csDiff = d => html`<small class="${d >= 0 ? 'win' : 'loss'}">~${fmt.signed(d)} CS</small>`;
     const g = this.live.gold;
     const cs = o.cs !== false && this.live.cs;
     setHtml(box, html`<div class="ov-tab-totals">

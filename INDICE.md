@@ -41,7 +41,7 @@ Contrato completo entre interfaz y proceso principal: `docs/ui-contract.md`. Dis
 | `ugg.js` | U.GG: `championBuilds`/`uggBuilds`, `matchups`/`laneMatchup`, `championCs`, `latest` |
 | `ddragon.js` | `DataDragon.load` (en español, caché por versión con componentes `from`) |
 | `champions.js` | `Champions`: `get`, `name`, `find`, `idFromEnglish`, `idFromKey`, `load(lcu)` |
-| `live.js` | `LiveGame`: `poll`, `compute` (129, todo el cálculo de partida), `nextSkill`, `readHudScale` |
+| `live.js` | `LiveGame`: `poll`, `compute` (todo el cálculo de partida; oro = valor de objetos sin consumibles ni abalorio), `byPosition` (emparejar líneas: posición del juego, si no Aplastar → jungla, objeto de apoyo → support, resto por orden), `logLanes` (oro y CS de los 10 en `log.txt` cada 5 min), `nextSkill`, `readHudScale` |
 | `objectives.js` | `DEFAULT_TIMES`, `NOTIFY_BEFORE`, `NOTIFY_KEYS`, `LANES` |
 | `keys.js` | `TabWatcher` (koffi + `GetAsyncKeyState`), `gameFocused` (ventana del juego en primer plano) |
 | `scouting.js` | `Scouting.start(puuid)`: espectador, liga, maestría, posiciones recientes (`recentPositions`, OP.GG) y premades (`markPremades`, async: comprueba en `riot.match` que iban en el mismo equipo); `sampleScouting` para «Probar overlay» |

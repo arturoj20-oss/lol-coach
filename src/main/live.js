@@ -7,6 +7,11 @@ const https = require('https');
 const { EventEmitter } = require('events');
 const { DEFAULT_TIMES, DRAGON_TYPES, LANES, LANE_NAMES, NOTIFY_BEFORE, NOTIFY_KEYS } = require('./objectives');
 const { liveContext } = require('./buildsets');
+const { log } = require('./log');
+
+const ORDER_POS = ['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'];
+// Objeto de apoyo (Atlas mundial y sus mejoras): delata al support si el juego no da la posicion
+const SUPPORT_ITEMS = new Set([3865, 3866, 3867, 3869, 3870, 3871, 3876, 3877]);
 
 const agent = new https.Agent({ rejectUnauthorized: false, keepAlive: false });
 
@@ -59,6 +64,7 @@ class LiveGame extends EventEmitter {
     this.csAuto = null;
     this.csRequested = false;
     this.warned = new Set();
+    this.lanesLogged = new Set();
     this.hudScale = this.readHudScale();
     this.timer = setInterval(() => this.poll().catch(() => { }), 1000);
   }
@@ -118,6 +124,42 @@ class LiveGame extends EventEmitter {
   static samePlayer(p, name) {
     if (!name) return false;
     return [p.riotId, p.riotIdGameName, p.summonerName].some(n => n && (n === name || n.split('#')[0] === name.split('#')[0]));
+  }
+
+  // Posicion -> jugador de un equipo. Primero la posicion que da el juego; a quien no la tenga (o la
+  // repita), la jungla por Aplastar, el support por su objeto y el resto por orden en lo que quede
+  static byPosition(team) {
+    const out = new Map();
+    const rest = [];
+    for (const p of team) {
+      if (ORDER_POS.includes(p.position) && !out.has(p.position)) out.set(p.position, p);
+      else rest.push(p);
+    }
+    const spells = p => Object.values(p.summonerSpells || {}).map(s => `${s?.rawDisplayName || ''} ${s?.displayName || ''}`).join(' ');
+    const guess = [
+      ['JUNGLE', p => /Smite|Aplastar/i.test(spells(p))],
+      ['UTILITY', p => (p.items || []).some(it => SUPPORT_ITEMS.has(it.itemID))],
+    ];
+    for (const [pos, test] of guess) {
+      if (out.has(pos)) continue;
+      const i = rest.findIndex(test);
+      if (i >= 0) out.set(pos, rest.splice(i, 1)[0]);
+    }
+    for (const pos of ORDER_POS) if (!out.has(pos) && rest.length) out.set(pos, rest.shift());
+    return out;
+  }
+
+  // Deja en log.txt el oro y CS por linea cada 5 min de partida, con la posicion que dio el juego,
+  // para comprobar las cifras del Tab contra el marcador
+  logLanes(gameTime, players, lanes, value) {
+    const mark = Math.floor(gameTime / 300);
+    if (mark < 1 || this.lanesLogged.has(mark)) return;
+    this.lanesLogged.add(mark);
+    const name = p => this.champions.name(this.championIdOf(p)) || p.championName;
+    const sign = n => `${n >= 0 ? '+' : ''}${n}`;
+    log(`partida ${Math.floor(gameTime / 60)}:${String(Math.floor(gameTime % 60)).padStart(2, '0')}: ` +
+      players.map(p => `${p.team}/${p.position || '-'} ${name(p)} ${value(p)} oro ${p.scores?.creepScore ?? '?'} cs`).join(' | '));
+    log('partida lineas: ' + lanes.map(l => `${l.position} ${sign(l.diff)} oro ${sign(l.csDiff)} cs`).join(' | '));
   }
 
   championIdOf(p) {
@@ -287,32 +329,32 @@ class LiveGame extends EventEmitter {
         .sort((a, b) => b.recommended - a.recommended);
       itemAdvice = { groups, reasons };
     }
-    const value = p => (p.items || []).reduce((s, it) => s + (items[it.itemID]?.gold ?? it.price ?? 0) * (it.count || 1), 0);
+    // Valor de lo comprado (el juego no da el oro de los demas): sin consumibles (pociones, elixires,
+    // centinelas de control) ni abalorio, que se gastan o no cuestan y hacen saltar la cifra
+    const lasting = it => it.slot !== 6 && !it.consumable && !(items[it.itemID]?.tags || []).some(t => t === 'Consumable' || t === 'Trinket');
+    const value = p => (p.items || []).filter(lasting).reduce((s, it) => s + (items[it.itemID]?.gold ?? it.price ?? 0) * (it.count || 1), 0);
     const gold = { ally: 0, enemy: 0, diff: 0 };
     for (const p of players) gold[p.team === myTeam ? 'ally' : 'enemy'] += value(p);
     gold.diff = gold.ally - gold.enemy;
 
-    // Oro por linea (valor de objetos) contra el rival de la misma posicion. Sin posicion (algunos
-    // modos) se empareja por el orden de la lista; el overlay lo ensena al mantener Tab
-    const ORDER_POS = ['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'];
+    // Oro y CS por linea contra el rival de la misma posicion; el overlay lo ensena al mantener Tab
     const side = mine => players.filter(p => (p.team === myTeam) === mine);
-    const allies = side(true), enemies = side(false);
-    const usePos = [...allies, ...enemies].every(p => ORDER_POS.includes(p.position));
-    const lanes = (usePos ? ORDER_POS : allies.map((_, i) => i)).map((pos, i) => {
-      const a = usePos ? allies.find(p => p.position === pos) : allies[i];
-      const e = usePos ? enemies.find(p => p.position === pos) : enemies[i];
+    const allies = LiveGame.byPosition(side(true)), enemies = LiveGame.byPosition(side(false));
+    const lanes = ORDER_POS.map(pos => {
+      const a = allies.get(pos), e = enemies.get(pos);
       if (!a || !e) return null;
       const ag = value(a), eg = value(e);
-      // El juego solo actualiza el CS de los demas de 10 en 10
+      // El juego solo actualiza el CS del marcador de 10 en 10: la diferencia es aproximada
       const ac = a.scores?.creepScore || 0, ec = e.scores?.creepScore || 0;
       return {
-        position: usePos ? pos : '', isMe: a === me,
+        position: pos, isMe: a === me,
         // riotId: para cruzarlo con el scouting (maestria, posicion y premades en el Tab)
         ally: { championId: this.championIdOf(a), gold: ag, cs: ac, riotId: a.riotId || a.summonerName || '' },
         enemy: { championId: this.championIdOf(e), gold: eg, cs: ec, riotId: e.riotId || e.summonerName || '' },
         diff: ag - eg, csDiff: ac - ec,
       };
     }).filter(Boolean);
+    this.logLanes(gameTime, players, lanes, value);
 
     const csTotal = me?.scores?.creepScore || 0;
     // Automatico (por defecto) si hay datos de U.GG; si no, el de Ajustes
