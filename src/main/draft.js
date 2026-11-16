@@ -13,6 +13,14 @@ const { mapLimit, pct, ROLE_FROM_POSITION, ROLE_NAMES, RIFT_QUEUES, laneToRole }
 const TIER_BONUS = { 1: 1.5, 2: 0.75, 3: 0, 4: -0.5, 5: -1 };
 const FLASH = 4;
 const MAX_PICKS = 8;
+// Sinergia de la linea inferior (ugg.duos): rol de tu dúo, partidas virtuales a lo esperable (para
+// que una pareja con poca muestra no salga como la mejor), minimo de partidas para proponer un
+// candidato por su sinergia, cuantos se añaden y cuanto pesa frente a los counters (1 = igual)
+const DUO_ROLE = { adc: 'support', support: 'adc' };
+const DUO_PRIOR_GAMES = 300;
+const DUO_MIN_GAMES = 300;
+const DUO_CANDIDATES = 6;
+const DUO_WEIGHT = 1.5;
 
 // Set de objetos de la tienda del juego (/lol-item-sets/v1/item-sets/{summonerId}/sets; con el puuid
 // la LCU responde 400). uid fijo con formato UUID, como los que crea el propio cliente; 'lol-coach'
@@ -534,8 +542,31 @@ class Draft extends EventEmitter {
     const owned = new Set(C.owned);
     const pool = [...personal.entries()].filter(([, s]) => s.roles[role]).sort((a, b) => b[1].games - a[1].games).map(([id]) => id);
     const metaTop = meta.filter(m => m.tier <= 3).slice(0, 16).map(m => C.idFromEnglish(m.champion)).filter(Boolean);
-    const candidates = [...new Set([...pool.slice(0, 10), ...metaTop])]
-      .filter(id => owned.has(id) && !taken.has(id) && C.get(id)).slice(0, 22);
+
+    // Linea inferior: tu dúo (ADC si vas de support y al reves) con campeon elegido o marcado. Sus
+    // parejas de U.GG dan la sinergia de cada candidato y añaden los que mejor combinan con el
+    const duoRole = DUO_ROLE[role];
+    const duo = duoRole && allies.find(a => !a.isMe && a.position === duoRole && a.championId > 0);
+    let duoRows = null, duoAvg = 0.5;
+    if (duo) {
+      try {
+        duoRows = (await ugg.duos(duo.championId)).roles[duoRole] || null;
+        const rows = Object.values(duoRows || {});
+        const g = rows.reduce((s, r) => s + r[1], 0);
+        if (g) duoAvg = rows.reduce((s, r) => s + r[0], 0) / g;
+      } catch (e) {
+        log(`sinergias de ${C.name(duo.championId)}: ${e.message}`);
+      }
+    }
+    const shrink = ([w, g], toward) => (w + DUO_PRIOR_GAMES * toward) / (g + DUO_PRIOR_GAMES);
+    const duoTop = Object.entries(duoRows || {})
+      .filter(([, r]) => r[1] >= DUO_MIN_GAMES)
+      .map(([id, r]) => ({ id: Number(id), wr: shrink(r, duoAvg) }))
+      .filter(x => owned.has(x.id) && !taken.has(x.id))
+      .sort((a, b) => b.wr - a.wr).slice(0, DUO_CANDIDATES).map(x => x.id);
+
+    const candidates = [...new Set([...pool.slice(0, 10), ...duoTop, ...metaTop])]
+      .filter(id => owned.has(id) && !taken.has(id) && C.get(id)).slice(0, 24);
 
     const enemyIds = enemies.map(e => e.championId).filter(id => id > 0);
     const keyOf = id => C.get(id)?.key;
@@ -591,8 +622,22 @@ class Draft extends EventEmitter {
         add(v, Math.abs(v) >= 1 ? (delta > 0 ? `Gana a ${name} (${pct(0.5 + delta)})` : `Sufre contra ${name} (${pct(0.5 + delta)})`) : null);
       });
 
-      // Sinergia con aliados que ya tienen campeon y rol
+      // Sinergia con tu dúo de la linea inferior (U.GG, todas las parejas): lo que la pareja gana por
+      // encima de lo esperable por el % de cada uno, con la muestra corta acercada a lo esperable
+      if (duo && duoRows) {
+        const r = duoRows[id];
+        if (r) {
+          const expected = duoAvg + ((metaWinRate ?? 0.5) - 0.5);
+          const syn = shrink(r, expected) - expected;
+          const v = syn * 100 * DUO_WEIGHT;
+          const name = C.name(duo.championId), stats = `${pct(r[0] / r[1])} juntos en ${r[1].toLocaleString('es-ES')} partidas`;
+          add(v, v >= 1 ? `Buena sinergia con ${name} (${stats})` : v <= -1 ? `Rinde menos de lo normal con ${name} (${stats})` : null);
+        }
+      }
+
+      // Sinergia con el resto de aliados que ya tienen campeon y rol (OP.GG, solo sus 3 mejores)
       for (const a of alliesWithChamp) {
+        if (duo && a === duo && duoRows) continue;
         const syn = a.position && data.synergies?.[a.position]?.find(x => x.synergy_champion_id === a.championId);
         if (!syn) continue;
         const v = (syn.win_rate - 0.5) * 50;

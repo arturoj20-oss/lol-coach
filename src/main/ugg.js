@@ -95,6 +95,34 @@ async function matchups(championId) {
   return data;
 }
 
+// Parejas de la linea inferior (mundo, Esmeralda+): { adc: { support: [victorias, partidas] },
+// support: { adc: [...] } } con las partidas del campeon en ese rol junto a cada compañero.
+// Fila de U.GG: [compañero, victorias de la pareja, partidas, ..., rol del compañero]; los datos son
+// simetricos (Jinx con Thresh = Thresh con Jinx) y la media ponderada da el % del campeon
+async function duos(championId) {
+  const v = await latest();
+  const file = cacheDir && path.join(cacheDir, `${v.patch}-${championId}-duos.json`);
+  if (file) {
+    try {
+      const saved = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (Date.now() - saved.at < TTL) return saved;
+    } catch { }
+  }
+  if (!versions.champion_duos) {
+    const all = await getJson(VERSIONS);
+    versions.champion_duos = all[v.patch]?.champion_duos || '1.5.0';
+  }
+  const raw = await getJson(`${STATS}/champion_duos/${v.patch}/ranked_solo_5x5/${championId}/${versions.champion_duos}.json`, 60000);
+  const roles = {};
+  for (const role of ['adc', 'support']) {
+    const list = raw?.[REGION]?.[RANK]?.[ROLE_IDS[role]]?.[0] || [];
+    roles[role] = Object.fromEntries(list.filter(x => x[2] > 0).map(x => [x[0], [x[1], x[2]]]));
+  }
+  const data = { at: Date.now(), patch: v.patch, roles };
+  if (file) try { fs.writeFileSync(file, JSON.stringify(data)); } catch { }
+  return data;
+}
+
 // Tu enfrentamiento en la seleccion: de los enemigos visibles, el rival de tu linea es el que mas
 // partidas tiene contra tu campeon en ese rol. Devuelve { vs, winRate, games, patch } o null
 async function laneMatchup(championId, role, enemyIds) {
@@ -220,4 +248,4 @@ async function championCs(championId, role) {
   return { csPerGame: r.cs / r.games, games: r.games };
 }
 
-module.exports = { initUgg, championBuilds, uggBuilds, matchups, laneMatchup, championCs, latest, ROLE_IDS };
+module.exports = { initUgg, championBuilds, uggBuilds, matchups, duos, laneMatchup, championCs, latest, ROLE_IDS };

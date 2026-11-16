@@ -146,4 +146,8 @@ Fuentes de datos: LCU, Live Client Data (`127.0.0.1:2999`), Riot API, MCP públi
   - Emparejamiento por jugador (`byPosition`): antes, si a uno le faltaba la posición, se emparejaba a los 10 por orden de lista (orden de selección) y se cruzaban las líneas.
   - El CS del marcador llega **de 10 en 10**: la diferencia sale con «~».
   - `log.txt` guarda cada 5 min las líneas `partida` con el oro y el CS de los 10 jugadores: compararlas con el Tab real.
+- 16/11, **picks con sinergia de dúo** (petición del usuario), sin probar en una selección real: si vas de ADC o support y tu dúo tiene campeón (elegido o marcado), los picks puntúan la sinergia con él y se añaden hasta 6 candidatos que mejor combinan.
+  - Fuente: U.GG `champion_duos` (`ugg.duos`), todas las parejas con muestra (unos 168 supports por ADC), simétrica. OP.GG solo da las 3 mejores sinergias por posición y no es simétrica: se sigue usando para los demás aliados.
+  - Puntuación: lo que la pareja gana por encima de lo esperable (% medio del dúo + % del candidato − 50 %), con 300 partidas virtuales para la muestra corta; pesa 1,5 veces un counter (`DUO_WEIGHT`).
+  - Probado con datos reales: con Jinx, Braum pasa a ser el primero (55 % juntos en 8.420 partidas).
 - `objectives.js`: falta confirmar cuándo se retira el Heraldo. Ahora se supone que se va cuando sale el Barón, a los 20:00.
