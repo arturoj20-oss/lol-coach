@@ -13,6 +13,13 @@ const { mapLimit, pct, ROLE_FROM_POSITION, ROLE_NAMES, RIFT_QUEUES, laneToRole }
 const TIER_BONUS = { 1: 1.5, 2: 0.75, 3: 0, 4: -0.5, 5: -1 };
 const FLASH = 4;
 const MAX_PICKS = 8;
+// Tu historial en el rol: partidas virtuales al 50 % para el winrate (una victoria suelta no dispara
+// la puntuacion), bonus de soltura que llega a su maximo con COMFORT_GAMES partidas en el rol y
+// penalizacion a lo que no esta en el meta del rol (OP.GG solo da su tier en otra posicion)
+const PERSONAL_PRIOR = 20;
+const COMFORT_MAX = 5;
+const COMFORT_GAMES = 20;
+const OFF_ROLE = 4;
 // Sinergia de la linea inferior (ugg.duos): rol de tu dúo, partidas virtuales a lo esperable (para
 // que una pareja con poca muestra no salga como la mejor), minimo de partidas para proponer un
 // candidato por su sinergia, cuantos se añaden y cuanto pesa frente a los counters (1 = igual)
@@ -247,11 +254,14 @@ class Draft extends EventEmitter {
         const me = g.participants?.[0];
         if (!me) continue;
         let s = stats.get(me.championId);
-        if (!s) stats.set(me.championId, s = { games: 0, wins: 0, roles: {} });
+        if (!s) stats.set(me.championId, s = { games: 0, wins: 0, roles: {}, roleWins: {} });
         s.games++;
         if (me.stats?.win) s.wins++;
         const role = laneToRole(me.timeline);
-        if (role) s.roles[role] = (s.roles[role] || 0) + 1;
+        if (role) {
+          s.roles[role] = (s.roles[role] || 0) + 1;
+          if (me.stats?.win) s.roleWins[role] = (s.roleWins[role] || 0) + 1;
+        }
       }
     } catch (e) {
       log(`historial para el draft: ${e.message}`);
@@ -540,7 +550,7 @@ class Draft extends EventEmitter {
       ...enemies.map(e => e.championId),
     ].filter(id => id > 0));
     const owned = new Set(C.owned);
-    const pool = [...personal.entries()].filter(([, s]) => s.roles[role]).sort((a, b) => b[1].games - a[1].games).map(([id]) => id);
+    const pool = [...personal.entries()].filter(([, s]) => s.roles[role]).sort((a, b) => b[1].roles[role] - a[1].roles[role]).map(([id]) => id);
     const metaTop = meta.filter(m => m.tier <= 3).slice(0, 16).map(m => C.idFromEnglish(m.champion)).filter(Boolean);
 
     // Linea inferior: tu dúo (ADC si vas de support y al reves) con campeon elegido o marcado. Sus
@@ -585,21 +595,25 @@ class Draft extends EventEmitter {
       let score = 0;
       const add = (v, text) => { score += v; if (text) reasons.push({ v, text }); };
 
-      // Meta: winrate del campeon en el rol y su tier
+      // Meta: winrate del campeon en el rol y su tier. Solo vale el meta del rol: average_stats de
+      // championAnalysis es el del campeon en general (Garen jungla salia como T2 de top)
       const m = metaById.get(id);
-      const avg = data.summary?.average_stats;
-      const tier = m?.tier ?? avg?.tier ?? null;
-      const metaWinRate = m?.win_rate ?? avg?.win_rate ?? null;
+      const tier = m?.tier ?? null;
+      const metaWinRate = m?.win_rate ?? null;
       if (metaWinRate != null) {
         const v = (metaWinRate - 0.5) * 100 + (TIER_BONUS[tier] || 0);
         add(v, tier && tier <= 2 ? `Tier ${tier} en ${ROLE_NAMES[role]} (${pct(metaWinRate)} de victorias)` : null);
+      } else if (meta.length) {
+        add(-OFF_ROLE, `Poco jugado en ${ROLE_NAMES[role]}`);
       }
 
-      // Tu historial: winrate suavizado (5 partidas virtuales al 50%) + soltura con el campeon
+      // Tu historial en este rol: winrate suavizado + soltura (lo que mas pesa en un main)
       const p = personal.get(id);
-      if (p?.games) {
-        const wr = (p.wins + 2.5) / (p.games + 5);
-        add((wr - 0.5) * 50 + Math.min(p.games, 15) / 15 * 2, `Llevas ${pct(p.wins / p.games)} de victorias en ${p.games} partidas`);
+      const rg = p?.roles[role] || 0, rw = p?.roleWins?.[role] || 0;
+      if (rg) {
+        const wr = (rw + PERSONAL_PRIOR / 2) / (rg + PERSONAL_PRIOR);
+        add((wr - 0.5) * 50 + COMFORT_MAX * Math.min(rg, COMFORT_GAMES) / COMFORT_GAMES,
+          `Llevas ${pct(rw / rg)} de victorias en ${rg} partida${rg === 1 ? '' : 's'} en ${ROLE_NAMES[role]}`);
       }
 
       // Counters contra cada rival visible; pesa mas el que suele jugar tu rol
@@ -653,14 +667,14 @@ class Draft extends EventEmitter {
       const tags = [];
       if (counterSum >= 1.5) tags.push('Counter');
       if (counterSum <= -1.5) tags.push('Riesgo');
-      if (p?.games >= 3) tags.push('Tu pool');
+      if (rg >= 3) tags.push('Tu pool');
       if (tier && tier <= 2) tags.push('Meta');
       if (reasons.some(r => r.text.startsWith('Buena sinergia'))) tags.push('Sinergia');
 
       return {
         championId: id, score: Math.round(score * 10) / 10,
         metaTier: tier, metaWinRate,
-        personal: p?.games ? { games: p.games, winRate: p.wins / p.games } : null,
+        personal: rg ? { games: rg, winRate: rw / rg } : null,
         tags,
         reasons: reasons.sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 4).map(r => r.text),
       };
